@@ -32,32 +32,83 @@ interface NomadContextType {
   isBleAdvertising: boolean;
   isBackgroundServiceActive: boolean;
   batteryEcoMode: boolean;
+  activeTargetPeerId: string | null;
+  setActiveTargetPeerId: (id: string | null) => void;
+  setIdentityAlias: (alias: string) => void;
   setBatteryEcoMode: (val: boolean) => void;
   startDiscovery: () => Promise<void>;
   stopDiscovery: () => Promise<void>;
+  scanForPeers: () => Promise<void>;
   toggleBackgroundService: () => Promise<void>;
+  toggleBleAdvertising: () => Promise<void>;
+  toggleRadioScanning: () => Promise<void>;
   sendDirectMessage: (targetPeerId: string, text: string) => Promise<void>;
   sendEmergencySos: (severity: EmergencySeverity, note: string) => Promise<void>;
+  cancelEmergencySos: () => Promise<void>;
   updatePeerTrust: (peerId: string, trust: TrustStatus) => void;
   sendConvoyRegroup: () => Promise<void>;
+  updateConvoyMemberStatus: (peerId: string, status: 'MOVING' | 'STOPPED' | 'REGROUPING' | 'ASSISTANCE_REQUESTED') => void;
+  addWaypoint: (wp: { name: string; latitude: number; longitude: number; altitudeMeters?: number; notes?: string }) => void;
+  removeWaypoint: (wpId: string) => void;
+  purgeCache: () => void;
 }
+
+const DISCOVERY_CANDIDATES: PeerRecord[] = [
+  {
+    peerId: 'c1d2e3f4a5b67890123456789abcdef0123456789abcdef0123456789abcdef0',
+    alias: 'Vanguard-Delta',
+    trustStatus: TrustStatus.DISCOVERED,
+    lastSeenTimestamp: Date.now(),
+    rssi: -66,
+    bearingDeg: 305,
+    distanceMeters: 38,
+    transportType: TransportType.BLE,
+    exchangePublicKeyHex: 'f4a5b67890123456789abcdef0123456789abcdef0123456789abcdef0c1d2e3',
+    signingPublicKeyHex: 'c1d2e3f4a5b67890123456789abcdef0123456789abcdef0123456789abcdef0',
+    safetyNumber: '3319 7720 4401',
+  },
+  {
+    peerId: 'd4e5f6a7b8c90123456789abcdef0123456789abcdef0123456789abcdef0123',
+    alias: 'Nomad-Recon-9',
+    trustStatus: TrustStatus.DISCOVERED,
+    lastSeenTimestamp: Date.now(),
+    rssi: -74,
+    bearingDeg: 82,
+    distanceMeters: 56,
+    transportType: TransportType.WIFI_DIRECT,
+    exchangePublicKeyHex: '0123456789abcdef0123456789abcdef0123456789abcdef0123d4e5f6a7b8c9',
+    signingPublicKeyHex: 'd4e5f6a7b8c90123456789abcdef0123456789abcdef0123456789abcdef0123',
+    safetyNumber: '8841 1290 6632',
+  },
+  {
+    peerId: 'e5f6a7b8c9d0123456789abcdef0123456789abcdef0123456789abcdef01234',
+    alias: 'Sierra-Sentry',
+    trustStatus: TrustStatus.VERIFICATION_PENDING,
+    lastSeenTimestamp: Date.now(),
+    rssi: -82,
+    bearingDeg: 168,
+    distanceMeters: 74,
+    transportType: TransportType.BLE,
+    exchangePublicKeyHex: 'abcdef0123456789abcdef0123456789abcdef01234e5f6a7b8c9d0123456789',
+    signingPublicKeyHex: 'e5f6a7b8c9d0123456789abcdef0123456789abcdef0123456789abcdef01234',
+    safetyNumber: '5501 8839 2210',
+  },
+];
 
 const NomadContext = createContext<NomadContextType | null>(null);
 
 export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  
-  const [identity] = useState<NomadDeviceIdentity>(() => {
+  const [identity, setIdentity] = useState<NomadDeviceIdentity>(() => {
     return CryptoEngine.generateIdentity('Ranger-Alpha');
   });
+  const [activeTargetPeerId, setActiveTargetPeerId] = useState<string | null>(null);
 
-  
   const [meshRouter] = useState<BoundedMeshRouter>(() => {
     return new BoundedMeshRouter(identity.peerId, 250, 7);
   });
 
   const [sensorEngine] = useState<DeadReckoningEngine>(() => {
     const engine = new DeadReckoningEngine();
-    
     engine.onGpsFix({
       timestamp: Date.now(),
       latitude: 34.2257,
@@ -70,7 +121,6 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return engine;
   });
 
-  
   const [peers, setPeers] = useState<PeerRecord[]>([
     {
       peerId: 'e89fbc018274a10293847561928374a5b6c7d8e9f0123456789abcdef0123456',
@@ -78,6 +128,8 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       trustStatus: TrustStatus.TRUSTED,
       lastSeenTimestamp: Date.now() - 15000,
       rssi: -62,
+      bearingDeg: 38,
+      distanceMeters: 28,
       transportType: TransportType.BLE,
       exchangePublicKeyHex: 'a5b6c7d8e9f0123456789abcdef0123456789abcdef0123456789abcdef01234',
       signingPublicKeyHex: 'e89fbc018274a10293847561928374a5b6c7d8e9f0123456789abcdef0123456',
@@ -89,6 +141,8 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       trustStatus: TrustStatus.VERIFICATION_PENDING,
       lastSeenTimestamp: Date.now() - 42000,
       rssi: -78,
+      bearingDeg: 215,
+      distanceMeters: 64,
       transportType: TransportType.BLE,
       exchangePublicKeyHex: '3746501928374650192837465019283746501928374650192837465019283746',
       signingPublicKeyHex: '77bc991024849182736450192837465019283746501928374650192837465019',
@@ -100,6 +154,8 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       trustStatus: TrustStatus.DISCOVERED,
       lastSeenTimestamp: Date.now() - 120000,
       rssi: -86,
+      bearingDeg: 125,
+      distanceMeters: 88,
       transportType: TransportType.WIFI_DIRECT,
       exchangePublicKeyHex: '8844775566112233445566778899aabbccddeeff0011223344aa882200119933',
       signingPublicKeyHex: '44aa8822001199338844775566112233445566778899aabbccddeeff00112233',
@@ -231,9 +287,54 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [sensorEngine]);
 
+  // Periodic passive RF sweep effect when scanning is active
+  useEffect(() => {
+    if (!isRadioScanning) return;
+
+    const rfInterval = setInterval(() => {
+      setPeers(prev => {
+        return prev.map(p => {
+          // Slight natural RSSI jitter simulating radio wave propagation
+          const delta = Math.floor(Math.random() * 5) - 2;
+          const newRssi = Math.min(-50, Math.max(-95, (p.rssi || -70) + delta));
+          return {
+            ...p,
+            rssi: newRssi,
+            lastSeenTimestamp: Date.now(),
+          };
+        });
+      });
+    }, 4000);
+
+    return () => clearInterval(rfInterval);
+  }, [isRadioScanning]);
+
+  const scanForPeers = async () => {
+    setIsRadioScanning(true);
+    setIsBleAdvertising(true);
+
+    // Actively probe radio perimeter and discover next peer from candidates if available
+    setPeers(prev => {
+      const existingIds = new Set(prev.map(p => p.peerId));
+      const nextCandidate = DISCOVERY_CANDIDATES.find(c => !existingIds.has(c.peerId));
+
+      const updated = prev.map(p => ({
+        ...p,
+        lastSeenTimestamp: Date.now(),
+        rssi: Math.min(-48, Math.max(-92, (p.rssi || -70) + (Math.floor(Math.random() * 5) - 2))),
+      }));
+
+      if (nextCandidate) {
+        return [...updated, { ...nextCandidate, lastSeenTimestamp: Date.now() }];
+      }
+      return updated;
+    });
+  };
+
   const startDiscovery = async () => {
     setIsRadioScanning(true);
     setIsBleAdvertising(true);
+    await scanForPeers();
   };
 
   const stopDiscovery = async () => {
@@ -245,10 +346,92 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsBackgroundServiceActive(prev => !prev);
   };
 
+  const toggleBleAdvertising = async () => {
+    setIsBleAdvertising(prev => !prev);
+  };
+
+  const toggleRadioScanning = async () => {
+    setIsRadioScanning(prev => !prev);
+  };
+
+  const setIdentityAlias = (newAlias: string) => {
+    if (!newAlias.trim()) return;
+    setIdentity(prev => ({
+      ...prev,
+      alias: newAlias.trim(),
+    }));
+    setConvoy(prev => ({
+      ...prev,
+      members: prev.members.map(m =>
+        m.peerId === identity.peerId ? { ...m, alias: `${newAlias.trim()} (You)` } : m
+      ),
+    }));
+  };
+
   const updatePeerTrust = (peerId: string, trust: TrustStatus) => {
     setPeers(prev =>
       prev.map(p => (p.peerId === peerId ? { ...p, trustStatus: trust } : p))
     );
+  };
+
+  const addWaypoint = (wp: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    altitudeMeters?: number;
+    notes?: string;
+  }) => {
+    const newWp = {
+      id: 'wp-' + Date.now().toString(16),
+      name: wp.name,
+      latitude: wp.latitude,
+      longitude: wp.longitude,
+      altitudeMeters: wp.altitudeMeters || 4350,
+      notes: wp.notes || 'Recorded on trail',
+      createdAt: Date.now(),
+    };
+    setConvoy(prev => ({
+      ...prev,
+      activeWaypoints: [newWp, ...prev.activeWaypoints],
+    }));
+  };
+
+  const removeWaypoint = (wpId: string) => {
+    setConvoy(prev => ({
+      ...prev,
+      activeWaypoints: prev.activeWaypoints.filter(w => w.id !== wpId),
+    }));
+  };
+
+  const updateConvoyMemberStatus = (
+    peerId: string,
+    status: 'MOVING' | 'STOPPED' | 'REGROUPING' | 'ASSISTANCE_REQUESTED'
+  ) => {
+    setConvoy(prev => ({
+      ...prev,
+      members: prev.members.map(m =>
+        m.peerId === peerId
+          ? { ...m, status, lastFixTimestamp: Date.now() }
+          : m
+      ),
+    }));
+  };
+
+  const purgeCache = () => {
+    setMessages([
+      {
+        messageId: 'msg-init-' + Date.now(),
+        conversationId: 'SYSTEM',
+        senderPeerId: 'SYSTEM',
+        recipientPeerId: identity.peerId,
+        text: 'Local DTN cache purged. Mesh routing buffers and message logs cleared.',
+        timestamp: Date.now(),
+        deliveryState: DeliveryState.DELIVERED_TO_DESTINATION,
+        hopCount: 0,
+        isOutgoing: false,
+        expiresAt: Date.now() + 86400000,
+      },
+    ]);
   };
 
   const sendDirectMessage = async (targetPeerId: string, text: string) => {
@@ -270,7 +453,6 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setMessages(prev => [...prev, newMsg]);
 
-    
     const rawPlaintext = WireProtocolSerializer.encodeDirectMessage({
       messageId: msgId,
       conversationId: targetPeerId,
@@ -286,7 +468,6 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const encryptedPackage = CryptoEngine.encryptForPeer(rawPlaintext, recipientPubKey);
 
-    
     const envelope = {
       messageId: msgId,
       protocolVersion: 1,
@@ -303,14 +484,14 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       nonce: encryptedPackage.nonce,
     };
 
-    
     meshRouter.enqueueForForwarding(envelope);
 
-    
     setTimeout(() => {
       setMessages(prev =>
         prev.map(m =>
-          m.messageId === msgId ? { ...m, deliveryState: DeliveryState.DELIVERED_TO_DESTINATION, hopCount: 1 } : m
+          m.messageId === msgId
+            ? { ...m, deliveryState: DeliveryState.DELIVERED_TO_DESTINATION, hopCount: 1 }
+            : m
         )
       );
     }, 1200);
@@ -338,9 +519,9 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       messageId: beaconId,
       protocolVersion: 1,
       originPeerId: identity.peerId,
-      destinationId: '*', 
+      destinationId: '*',
       createdAt: Date.now(),
-      expiresAt: Date.now() + 172800000, 
+      expiresAt: Date.now() + 172800000,
       hopLimit: 12,
       hopCount: 0,
       payloadType: PayloadType.PAYLOAD_EMERGENCY_BEACON,
@@ -350,7 +531,6 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     meshRouter.enqueueForForwarding(envelope);
 
-    
     setMessages(prev => [
       ...prev,
       {
@@ -365,6 +545,26 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isOutgoing: true,
         expiresAt: Date.now() + 172800000,
         isEmergency: true,
+      },
+    ]);
+  };
+
+  const cancelEmergencySos = async () => {
+    const clearId = 'sos-clear-' + Date.now().toString(16);
+    setMessages(prev => [
+      ...prev,
+      {
+        messageId: clearId,
+        conversationId: 'EMERGENCY_BROADCAST',
+        senderPeerId: identity.peerId,
+        recipientPeerId: '*',
+        text: `[EMERGENCY STAND DOWN / ALL CLEAR]: Distress condition cancelled by ${identity.alias}. Threat mitigated.`,
+        timestamp: Date.now(),
+        deliveryState: DeliveryState.DELIVERED_TO_DESTINATION,
+        hopCount: 0,
+        isOutgoing: true,
+        expiresAt: Date.now() + 86400000,
+        isEmergency: false,
       },
     ]);
   };
@@ -390,14 +590,25 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isBleAdvertising,
         isBackgroundServiceActive,
         batteryEcoMode,
+        activeTargetPeerId,
+        setActiveTargetPeerId,
+        setIdentityAlias,
         setBatteryEcoMode,
         startDiscovery,
         stopDiscovery,
+        scanForPeers,
         toggleBackgroundService,
+        toggleBleAdvertising,
+        toggleRadioScanning,
         sendDirectMessage,
         sendEmergencySos,
+        cancelEmergencySos,
         updatePeerTrust,
         sendConvoyRegroup,
+        updateConvoyMemberStatus,
+        addWaypoint,
+        removeWaypoint,
+        purgeCache,
       }}
     >
       {children}

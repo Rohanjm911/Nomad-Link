@@ -26,11 +26,17 @@ interface OfflineRegion {
   lastUpdated: string;
 }
 
-export const OfflineMapsScreen: React.FC = () => {
-  const { deadReckoning } = useNomad();
+interface OfflineMapsScreenProps {
+  onNavigate?: (tab: string, peerId?: string) => void;
+}
+
+export const OfflineMapsScreen: React.FC<OfflineMapsScreenProps> = ({ onNavigate }) => {
+  const { deadReckoning, addWaypoint, convoy } = useNomad();
   const [selectedTab, setSelectedTab] = useState<'map' | 'manager'>('map');
   const [waypointName, setWaypointName] = useState('');
   const [isMarkingWaypoint, setIsMarkingWaypoint] = useState(false);
+  const [zoomLevelMeters, setZoomLevelMeters] = useState(500);
+  const [mapLayer, setMapLayer] = useState<'contour' | 'terrain' | 'grid'>('contour');
 
   const [regions, setRegions] = useState<OfflineRegion[]>([
     {
@@ -58,11 +64,16 @@ export const OfflineMapsScreen: React.FC = () => {
 
   const handleDownloadRegion = (regionId: string) => {
     setRegions(prev =>
-      prev.map(r =>
-        r.id === regionId ? { ...r, status: 'DOWNLOADED', lastUpdated: 'Just now' } : r
-      )
+      prev.map(r => (r.id === regionId ? { ...r, status: 'DOWNLOADING' } : r))
     );
-    Alert.alert('Region Cached', 'Topographic vector tiles saved to device offline storage.');
+    setTimeout(() => {
+      setRegions(prev =>
+        prev.map(r =>
+          r.id === regionId ? { ...r, status: 'DOWNLOADED', lastUpdated: 'Just now' } : r
+        )
+      );
+      Alert.alert('Region Cached', 'Topographic vector tiles saved to device offline storage.');
+    }, 1200);
   };
 
   const handleDeleteRegion = (regionId: string) => {
@@ -78,6 +89,29 @@ export const OfflineMapsScreen: React.FC = () => {
         },
       },
     ]);
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevelMeters(prev => Math.max(100, Math.round(prev / 2)));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevelMeters(prev => Math.min(5000, Math.round(prev * 2)));
+  };
+
+  const handleToggleLayer = () => {
+    setMapLayer(prev => {
+      if (prev === 'contour') return 'terrain';
+      if (prev === 'terrain') return 'grid';
+      return 'contour';
+    });
+  };
+
+  const handleRecenter = () => {
+    Alert.alert(
+      'Map Recentered',
+      `Locked to current position:\n${deadReckoning.latitude.toFixed(5)}°N, ${deadReckoning.longitude.toFixed(5)}°E\nSensor Fix: ${deadReckoning.isGpsActive ? 'GNSS Lock' : 'Dead-Reckoning'}`
+    );
   };
 
   return (
@@ -132,29 +166,114 @@ export const OfflineMapsScreen: React.FC = () => {
             </View>
 
             
+            {/* VECTOR MAP CANVAS */}
             <View style={styles.vectorCanvas}>
-              
-              <View style={styles.contourLine1} />
-              <View style={styles.contourLine2} />
-              <View style={styles.trailPath} />
+              {mapLayer === 'contour' && (
+                <>
+                  <View style={styles.contourLine1} />
+                  <View style={styles.contourLine2} />
+                  <View style={styles.trailPath} />
+                </>
+              )}
+              {mapLayer === 'terrain' && (
+                <View style={styles.terrainOverlay}>
+                  <View style={styles.contourLine1} />
+                  <View style={styles.reliefShading} />
+                </View>
+              )}
+              {mapLayer === 'grid' && (
+                <View style={styles.gridOverlay}>
+                  <View style={styles.trailPath} />
+                  <View style={styles.gridLineH1} />
+                  <View style={styles.gridLineH2} />
+                  <View style={styles.gridLineV1} />
+                  <View style={styles.gridLineV2} />
+                </View>
+              )}
 
-              
+              {/* SAVED WAYPOINTS PINS ON CANVAS */}
+              {convoy.activeWaypoints.map((wp, idx) => (
+                <TouchableOpacity
+                  key={wp.id}
+                  style={[
+                    styles.canvasWpPin,
+                    { top: `${30 + (idx % 3) * 25}%`, left: `${20 + (idx % 4) * 20}%` },
+                  ]}
+                  onPress={() =>
+                    Alert.alert(
+                      wp.name,
+                      `Coordinates: ${wp.latitude.toFixed(4)}°N, ${wp.longitude.toFixed(4)}°E\nAltitude: ${wp.altitudeMeters || 4350}m\n${wp.notes || ''}`
+                    )
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.canvasWpIcon}>📍</Text>
+                  <Text style={styles.canvasWpName} numberOfLines={1}>
+                    {wp.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              {/* USER CURRENT POSITION FIX */}
               <View style={styles.posMarker}>
                 <View style={styles.posHeadingCone} />
                 <View style={styles.posCenterDot} />
               </View>
 
-              
+              {/* SCALE BAR */}
               <View style={styles.scaleBar}>
                 <View style={styles.scaleLine} />
-                <Text style={styles.scaleText}>500 m</Text>
+                <Text style={styles.scaleText}>{zoomLevelMeters} m</Text>
               </View>
 
-              
-              <View style={styles.compassBox}>
+              {/* MAP TOOLBAR (ZOOM / RECENTER / LAYER) */}
+              <View style={styles.canvasToolbar}>
+                <TouchableOpacity
+                  style={styles.canvasToolBtn}
+                  onPress={handleZoomIn}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.canvasToolText}>＋</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.canvasToolBtn}
+                  onPress={handleZoomOut}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.canvasToolText}>－</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.canvasToolBtn}
+                  onPress={handleRecenter}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.canvasToolIcon}>🎯</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.canvasToolBtn}
+                  onPress={handleToggleLayer}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.canvasToolIcon}>
+                    {mapLayer === 'contour' ? '⛰️' : mapLayer === 'terrain' ? '🛰️' : '▦'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* COMPASS ROSE */}
+              <TouchableOpacity
+                style={styles.compassBox}
+                onPress={() =>
+                  Alert.alert(
+                    'Magnetic Compass',
+                    `Current Heading: ${deadReckoning.headingDegrees.toFixed(1)}° Magnetic North.\nInertial Sensor Bias: ±0.4°.\nDeclination corrected for Ladakh sector.`
+                  )
+                }
+                activeOpacity={0.7}
+              >
                 <Text style={styles.compassNorth}>N</Text>
                 <Text style={styles.compassDeg}>{deadReckoning.headingDegrees.toFixed(0)}°</Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.mapFooterRow}>
@@ -169,14 +288,16 @@ export const OfflineMapsScreen: React.FC = () => {
 
               <TouchableOpacity
                 style={styles.markWpBtn}
-                onPress={() => setIsMarkingWaypoint(true)}
+                onPress={() => setIsMarkingWaypoint(!isMarkingWaypoint)}
               >
-                <Text style={styles.markWpBtnText}>+ Waypoint</Text>
+                <Text style={styles.markWpBtnText}>
+                  {isMarkingWaypoint ? 'Cancel ✕' : '+ Waypoint'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          
+          {/* WAYPOINT PROMPT CARD */}
           {isMarkingWaypoint && (
             <View style={styles.waypointPromptCard}>
               <Text style={styles.promptTitle}>SAVE CURRENT SENSOR COORDINATES</Text>
@@ -192,7 +313,17 @@ export const OfflineMapsScreen: React.FC = () => {
                   label="Save Waypoint"
                   onPress={() => {
                     if (waypointName.trim()) {
-                      Alert.alert('Waypoint Recorded', `Saved "${waypointName}" at current coordinates.`);
+                      addWaypoint({
+                        name: waypointName.trim(),
+                        latitude: deadReckoning.latitude,
+                        longitude: deadReckoning.longitude,
+                        altitudeMeters: 4350,
+                        notes: 'Saved from Offline Maps Navigation',
+                      });
+                      Alert.alert(
+                        'Waypoint Recorded',
+                        `Saved "${waypointName}" at current coordinates and synced with Convoy.`
+                      );
                       setWaypointName('');
                       setIsMarkingWaypoint(false);
                     }
@@ -208,7 +339,32 @@ export const OfflineMapsScreen: React.FC = () => {
             </View>
           )}
 
-          
+          {/* ACTIVE WAYPOINTS LIST */}
+          <SectionHeader title={`Sector Waypoints (${convoy.activeWaypoints.length})`} />
+          <View style={styles.wpListCard}>
+            {convoy.activeWaypoints.map(wp => (
+              <TouchableOpacity
+                key={wp.id}
+                style={styles.wpRow}
+                onPress={() =>
+                  Alert.alert(
+                    wp.name,
+                    `Fix: ${wp.latitude.toFixed(4)}°N, ${wp.longitude.toFixed(4)}°E\nAltitude: ${wp.altitudeMeters || 4350}m\n${wp.notes || ''}`
+                  )
+                }
+                activeOpacity={0.7}
+              >
+                <View>
+                  <Text style={styles.wpRowTitle}>{wp.name}</Text>
+                  <Text style={styles.wpRowCoords}>
+                    {wp.latitude.toFixed(4)}° N, {wp.longitude.toFixed(4)}° E · {wp.altitudeMeters || 4350}m
+                  </Text>
+                </View>
+                <Text style={styles.wpRowChevron}>→</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <View style={styles.noticeCard}>
             <Text style={styles.noticeTitle}>OFFLINE ROUTING ADVISORY</Text>
             <Text style={styles.noticeBody}>
@@ -613,5 +769,138 @@ const styles = StyleSheet.create({
     ...NomadTypography.button,
     fontSize: 12,
     color: DarkThemeColors.emergencyRed,
+  },
+  terrainOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#1B2A38',
+  },
+  reliefShading: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    width: 200,
+    height: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 50,
+    transform: [{ rotate: '-25deg' }],
+  },
+  gridOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  gridLineH1: {
+    position: 'absolute',
+    top: '33%',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  gridLineH2: {
+    position: 'absolute',
+    top: '66%',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  gridLineV1: {
+    position: 'absolute',
+    left: '33%',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  gridLineV2: {
+    position: 'absolute',
+    left: '66%',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  canvasWpPin: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(10, 10, 15, 0.85)',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: NomadRadius.xs,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.warningAmber,
+    maxWidth: 90,
+    gap: 3,
+  },
+  canvasWpIcon: {
+    fontSize: 9,
+  },
+  canvasWpName: {
+    ...NomadTypography.monoSmall,
+    fontSize: 8,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '700',
+  },
+  canvasToolbar: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(10, 10, 15, 0.85)',
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.full,
+    padding: 2,
+    gap: 2,
+  },
+  canvasToolBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+  },
+  canvasToolText: {
+    color: DarkThemeColors.primaryText,
+    fontSize: 14,
+    fontWeight: '800',
+    lineHeight: 18,
+  },
+  canvasToolIcon: {
+    fontSize: 11,
+  },
+  wpListCard: {
+    backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.md,
+    padding: NomadSpacing.sm,
+    marginBottom: NomadSpacing.md,
+  },
+  wpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: NomadSpacing.xs + 2,
+    paddingHorizontal: NomadSpacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkThemeColors.borderSubtle,
+  },
+  wpRowTitle: {
+    ...NomadTypography.bodyMedium,
+    color: DarkThemeColors.primaryText,
+    fontSize: 12.5,
+  },
+  wpRowCoords: {
+    ...NomadTypography.mono,
+    fontSize: 10,
+    color: DarkThemeColors.mutedText,
+    marginTop: 2,
+  },
+  wpRowChevron: {
+    ...NomadTypography.mono,
+    fontSize: 14,
+    color: DarkThemeColors.actionBlue,
   },
 });

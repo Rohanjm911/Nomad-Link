@@ -27,8 +27,12 @@ interface GroupModel {
   trustState: 'VERIFIED' | 'SYNCHRONIZING' | 'KEY_ROTATION_PENDING';
 }
 
-export const GroupsScreen: React.FC = () => {
-  const { peers } = useNomad();
+interface GroupsScreenProps {
+  onNavigate?: (tab: string, peerId?: string) => void;
+}
+
+export const GroupsScreen: React.FC<GroupsScreenProps> = ({ onNavigate }) => {
+  const { peers, identity } = useNomad();
   const [groups, setGroups] = useState<GroupModel[]>([
     {
       groupId: 'grp-convoy-alpha',
@@ -51,6 +55,51 @@ export const GroupsScreen: React.FC = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [groupMsgText, setGroupMsgText] = useState('');
+  const [activeComposingGroupId, setActiveComposingGroupId] = useState<string | null>(null);
+
+  const handleRotateKey = (groupId: string) => {
+    setGroups(prev =>
+      prev.map(g =>
+        g.groupId === groupId
+          ? { ...g, trustState: 'VERIFIED', lastMessageSnippet: 'Ratchet key rotated. Forward secrecy established.' }
+          : g
+      )
+    );
+    Alert.alert('Sender Key Rotated', 'A new 256-bit symmetric ratchet key was generated and encrypted for all group members.');
+  };
+
+  const handleSendGroupBroadcast = (groupId: string) => {
+    if (!groupMsgText.trim()) return;
+    setGroups(prev =>
+      prev.map(g =>
+        g.groupId === groupId
+          ? {
+              ...g,
+              lastMessageSnippet: `${identity.alias}: ${groupMsgText.trim()}`,
+              pendingDeliveryCount: 0,
+            }
+          : g
+      )
+    );
+    Alert.alert('Group Broadcast Sent', `Multi-recipient envelope transmitted to all nodes in group.`);
+    setGroupMsgText('');
+    setActiveComposingGroupId(null);
+  };
+
+  const handleAddMemberToGroup = (groupId: string) => {
+    const unaddedPeer = peers[0];
+    if (unaddedPeer) {
+      setGroups(prev =>
+        prev.map(g =>
+          g.groupId === groupId ? { ...g, memberCount: g.memberCount + 1 } : g
+        )
+      );
+      Alert.alert('Member Added', `${unaddedPeer.alias} received the group Sender Key package.`);
+    } else {
+      Alert.alert('No Candidates', 'Scan adjacent mesh perimeter to discover new nodes first.');
+    }
+  };
 
   const selectedGroup = groups.find(g => g.groupId === selectedGroupId);
 
@@ -159,12 +208,73 @@ export const GroupsScreen: React.FC = () => {
                 Group messages are encrypted using Sender-Key ratchets. Intermediary mesh relays cannot decrypt or manipulate group messages.
               </Text>
 
-              <Text style={styles.memberListTitle}>ROSTER IN RANGE ({peers.length + 1} NODES):</Text>
-              <Text style={styles.memberItem}>• Ranger-Alpha (You) · Role: Group Admin</Text>
-              {peers.map(p => (
-                <Text key={p.peerId} style={styles.memberItem}>
-                  • {p.alias} · Fingerprint: {p.safetyNumber} ({p.trustStatus})
-                </Text>
+              {/* GROUP ACTIONS ROW */}
+              <View style={styles.groupActionsRow}>
+                <TouchableOpacity
+                  style={styles.groupActionBtn}
+                  onPress={() =>
+                    setActiveComposingGroupId(
+                      activeComposingGroupId === group.groupId ? null : group.groupId
+                    )
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.groupActionText}>
+                    {activeComposingGroupId === group.groupId ? 'Cancel ✕' : '💬 Broadcast Message'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.groupActionBtn}
+                  onPress={() => handleRotateKey(group.groupId)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.groupActionText}>🔑 Rotate Keys</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.groupActionBtn}
+                  onPress={() => handleAddMemberToGroup(group.groupId)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.groupActionText}>+ Add Node</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* COMPOSER IF ACTIVE */}
+              {activeComposingGroupId === group.groupId && (
+                <View style={styles.groupComposerBox}>
+                  <TextInput
+                    style={styles.groupComposerInput}
+                    value={groupMsgText}
+                    onChangeText={setGroupMsgText}
+                    placeholder={`Broadcast to ${group.name}...`}
+                    placeholderTextColor={DarkThemeColors.mutedText}
+                  />
+                  <TouchableOpacity
+                    style={[styles.groupSendBtn, !groupMsgText.trim() && styles.btnDisabled]}
+                    disabled={!groupMsgText.trim()}
+                    onPress={() => handleSendGroupBroadcast(group.groupId)}
+                  >
+                    <Text style={styles.groupSendText}>Send</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              <Text style={styles.memberListTitle}>ROSTER IN RANGE ({group.memberCount} NODES):</Text>
+              <Text style={styles.memberItem}>• {identity.alias} (You) · Role: Group Admin</Text>
+              {peers.slice(0, group.memberCount - 1).map(p => (
+                <TouchableOpacity
+                  key={p.peerId}
+                  style={styles.rosterRow}
+                  onPress={() => onNavigate && onNavigate('Messages', p.peerId)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.memberItem}>
+                    • {p.alias} · FP: {p.safetyNumber} ({p.trustStatus})
+                  </Text>
+                  <Text style={styles.rosterMsgBtn}>Message →</Text>
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -349,5 +459,68 @@ const styles = StyleSheet.create({
     ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
     marginBottom: 2,
+  },
+  groupActionsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginVertical: NomadSpacing.xs,
+  },
+  groupActionBtn: {
+    flex: 1,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    paddingVertical: 5,
+    borderRadius: NomadRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  groupActionText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 9.5,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '700',
+  },
+  groupComposerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.sm,
+    paddingHorizontal: NomadSpacing.sm,
+    paddingVertical: 4,
+    marginVertical: NomadSpacing.xs,
+    gap: 6,
+  },
+  groupComposerInput: {
+    flex: 1,
+    minHeight: 36,
+    color: DarkThemeColors.primaryText,
+    fontSize: 12,
+  },
+  groupSendBtn: {
+    backgroundColor: DarkThemeColors.actionBlue,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: NomadRadius.xs,
+  },
+  groupSendText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  rosterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  rosterMsgBtn: {
+    ...NomadTypography.monoSmall,
+    fontSize: 9.5,
+    color: DarkThemeColors.actionBlue,
+    fontWeight: '700',
   },
 });

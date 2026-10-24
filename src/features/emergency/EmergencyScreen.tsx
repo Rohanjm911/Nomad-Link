@@ -19,8 +19,12 @@ import { EmergencySeverity } from '../../../protocol/WireProtocol';
 import { DangerButton, SecondaryButton } from '../../components/Buttons';
 import { SectionHeader } from '../../components/FeedbackStates';
 
-export const EmergencyScreen: React.FC = () => {
-  const { sendEmergencySos, deadReckoning, identity } = useNomad();
+interface EmergencyScreenProps {
+  onNavigate?: (tab: string, peerId?: string) => void;
+}
+
+export const EmergencyScreen: React.FC<EmergencyScreenProps> = ({ onNavigate }) => {
+  const { sendEmergencySos, cancelEmergencySos, deadReckoning, identity } = useNomad();
   const [selectedSeverity, setSelectedSeverity] = useState<EmergencySeverity>(
     EmergencySeverity.SEVERITY_MEDEVAC
   );
@@ -53,15 +57,23 @@ export const EmergencyScreen: React.FC = () => {
   };
 
   const handleCancelSos = () => {
-    Alert.alert('Cancel Distress Beacon?', 'This will halt active emergency re-transmissions.', [
+    Alert.alert('Cancel Distress Beacon?', 'This will halt active emergency re-transmissions and broadcast an ALL CLEAR envelope to the mesh.', [
       { text: 'Keep Active', style: 'cancel' },
       {
         text: 'Stand Down Beacon',
-        onPress: () => {
+        onPress: async () => {
+          await cancelEmergencySos();
           setSosDispatched(false);
+          Alert.alert('Distress Beacon Cancelled', 'All-Clear envelope sent to mesh nodes.');
         },
       },
     ]);
+  };
+
+  const handleUpdateSitrep = async () => {
+    if (!note.trim()) return;
+    await sendEmergencySos(selectedSeverity, `[SITREP UPDATE]: ${note.trim()}`);
+    Alert.alert('SITREP Update Broadcasted', 'Updated situation telemetry sent to all adjacent mesh relays.');
   };
 
   return (
@@ -95,9 +107,18 @@ export const EmergencyScreen: React.FC = () => {
           <Text style={styles.deliveryStatusNote}>
             STATUS: Stored in local DTN router. Burst advertisement repeats every 8 seconds over BLE & Wi-Fi Direct.
           </Text>
-          <TouchableOpacity style={styles.standDownBtn} onPress={handleCancelSos} activeOpacity={0.7}>
-            <Text style={styles.standDownText}>Halt Distress Beacon / Stand Down</Text>
-          </TouchableOpacity>
+          <View style={styles.dispatchedActionsRow}>
+            <TouchableOpacity style={styles.standDownBtn} onPress={handleCancelSos} activeOpacity={0.7}>
+              <Text style={styles.standDownText}>Halt Distress Beacon / Stand Down</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.viewCommsBtn}
+              onPress={() => onNavigate && onNavigate('Messages')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.viewCommsText}>View Distress Stream in Comms →</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
@@ -305,8 +326,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
   },
-  standDownBtn: {
+  dispatchedActionsRow: {
     marginTop: NomadSpacing.sm,
+    gap: 8,
+  },
+  standDownBtn: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
@@ -318,6 +342,21 @@ const styles = StyleSheet.create({
     ...NomadTypography.monoSmall,
     fontSize: 10.5,
     color: DarkThemeColors.accent,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  viewCommsBtn: {
+    backgroundColor: DarkThemeColors.actionBlueSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.actionBlue,
+    paddingVertical: NomadSpacing.sm,
+    borderRadius: NomadRadius.full,
+    alignItems: 'center',
+  },
+  viewCommsText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10.5,
+    color: DarkThemeColors.actionBlue,
     fontWeight: '800',
     letterSpacing: 0.8,
   },

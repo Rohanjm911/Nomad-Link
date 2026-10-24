@@ -28,6 +28,8 @@ export interface PeerRecord {
   trustStatus: TrustStatus;
   lastSeenTimestamp: number;
   rssi?: number;
+  bearingDeg?: number;
+  distanceMeters?: number;
   transportType: TransportType;
   exchangePublicKeyHex: string;
   signingPublicKeyHex: string;

@@ -4,10 +4,12 @@
 
 <br/>
 
-# NOMAD LINK
-
-> **No Signal. No Limits.**  
-> Offline-First Peer-to-Peer Communication & Convoy Coordination Platform for Android.
+<div align="center">
+  <img src="docs/assets/logo.png" alt="NOMAD LINK Official Logo" width="150" />
+  <h1>NOMAD LINK</h1>
+  <p><strong>No Signal. No Limits.</strong><br/>
+  Offline-First Peer-to-Peer Communication & Convoy Coordination Platform for Android.</p>
+</div>
 
 NOMAD LINK is an off-grid tactical expedition application built for car convoys, motorcycle touring groups, mountain explorers, disaster response teams, and travelers operating beyond cellular and internet coverage.
 
@@ -58,14 +60,16 @@ Operates completely without cellular network towers, satellite internet, or cent
 - Real-time confidence decay model dynamically expands the uncertainty radius on screen.
 
 ### 5. Convoy Management & Tactical Telemetry
-- Real-time tracking of vehicle speeds, headings, altitudes, and convoy member states (`MOVING`, `REGROUPING`, `ASSISTANCE_REQUESTED`).
-- One-touch regroup broadcasts across BLE and Wi-Fi Direct.
-- Pre-cached offline waypoints with direct bearing lines.
+- Real-time tracking of vehicle speeds, headings, altitudes, and convoy member states (`MOVING`, `STOPPED`, `REGROUPING`, `ASSISTANCE_REQUESTED`).
+- Interactive vehicle state selector to broadcast local status across BLE and Wi-Fi Direct.
+- Interactive tactical radar with clickable vehicle pins and direct comms routing.
+- Synchronized tactical checkpoints/waypoints with GPS coordinate capture and map bearing lines.
 
-### 6. Tactical SOS Distress Beacon
+### 6. Tactical SOS Distress Beacon & Stand Down
 - High-priority emergency envelope (Hop Limit: 12) prioritized across all mesh nodes.
-- Broadcasts Situation Report (SITREP) severity: `MEDEVAC`, `SEARCH_AND_RESCUE`, `MECHANICAL_BREAKDOWN`, `SEVERE_WEATHER`.
+- One-touch SITREP incident buttons: `MEDEVAC`, `SEARCH_AND_RESCUE`, `MECHANICAL_BREAKDOWN`, `SEVERE_WEATHER`.
 - Transmits last reliable GPS / dead-reckoned coordinates, accuracy radius, and personnel count.
+- **Stand Down Protocol:** "Halt Distress Beacon / Stand Down" button broadcasts an `ALL CLEAR / STAND DOWN` packet to demobilize the mesh emergency alert.
 
 ### 7. Background Relay & Battery Conservation
 - Persistent `NomadForegroundService.kt` with ongoing notification keeps the mesh active while the device screen is off.
@@ -117,28 +121,54 @@ NOMAD LINK operates on a **Pure Ad-Hoc Peer-to-Peer (P2P)** paradigm with zero d
 Built with a rugged **Mil-Spec Cyber-Tactical (Military Radio Style 📟)** interface engineered for harsh outdoor environments, night operations, and extreme glare conditions on OLED/AMOLED displays:
 
 - **Top Unified Tactical HUD:**
-  - Active RF state LED (`RF: ACTIVE` glowing green / `RF: STANDBY` amber).
-  - Node identity callsign bracket (`[NODE: NOMAD-01]`).
-  - Slide-out Hardware Drawer with direct toggles for BLE Advertising, Scanning, Wi-Fi Direct, and Battery Eco-Mode.
-- **4-Gauge Digital Telemetry Matrix:**
-  - `01 DISCOVERED`: Total RF peer nodes detected in radio perimeter.
-  - `02 VERIFIED`: Cryptographically authenticated peer nodes with active E2EE session keys.
-  - `03 CONVOY`: Fleet units currently in convoy formation.
-  - `04 DTN RELAY`: Delay-tolerant envelopes cached or forwarded across the mesh.
-- **Tactical Peer Discovery & Mesh Radar:**
+  - Active RF state LED (`RF: ACTIVE` glowing green / `RF: STANDBY` amber) — tap to toggle live BLE scanning directly.
+  - Interactive Call-Sign badge (`[NODE: CALLSIGN]`) — tap to jump directly into Identity & Radio Settings.
+  - Brand identity icon & title — tap to return to the Tactical HUD.
+- **4-Gauge Digital Telemetry Matrix (Interactive):**
+  - `01 DISCOVERED`: Total RF peer nodes — tap to jump into the **Mesh Radar & Discovery** screen.
+  - `02 VERIFIED`: Cryptographically authenticated peer nodes — tap to view the trusted peer roster.
+  - `03 CONVOY`: Fleet units currently in formation — tap to jump into **Convoy Coordination**.
+  - `04 DTN RELAY`: Delay-tolerant envelopes cached or routed — tap to open the **Comms Terminal**.
+- **Tactical Peer Discovery & Interactive Mesh Radar (`RadarScope`):**
   - Real-time 4-bar RSSI Signal Meters (`|||| -64 dBm` with color-coded signal quality).
   - Dual Mode Switcher: `// 01 NODE LIST //` (actionable peer telemetry) and `// 02 MESH TOPOLOGY //` (dynamic multi-hop node visualization).
-  - Chamfered Mil-Spec bracket chips (`[✓ VERIFIED]`, `[▲ PENDING AUTH]`, `[BLE-GATT]`).
+  - Clickable radar blips with instant node inspection popover and `Message Node` direct routing.
+  - Out-of-band Optical QR Code Verification Box with tap-to-authenticate cryptographic workflow.
+  - Commutative SAS 6-digit numeric verification modal with Authorize and Revoke trust controls.
 - **Encrypted Comms Terminal:**
-  - Cryptographic envelope security banner with recipient key fingerprint.
-  - End-to-end encrypted chat bubbles with explicit hop limit counters (`HOP 1/7`).
+  - Dynamic target recipient pre-selection from any screen.
+  - Tactical Quick Action Chips for one-tap radio transmissions:
+    - `📍 Send Coordinates` (GPS / dead-reckoned location packet)
+    - `📻 Radio Check` (Instant ping packet)
+    - `🚙 Convoy Hold` (Tactical halt advisory)
+    - `✅ Route Clear` (All-clear status broadcast)
+  - Long-press diagnostic packet inspector for payload signatures, hop count, and DTN status.
   - Terminal-style monospace message composer with `TX>` prompt.
+- **Convoy Coordination Fleet Manager:**
+  - Local vehicle state selector: `MOVING`, `STOPPED`, `REGROUPING`, `ASSISTANCE_REQUESTED`.
+  - Tactical convoy radar with clickable unit pins and real-time bearing lines.
+  - Direct unit messaging shortcuts (`Direct Comms →`) on each vehicle card.
+  - Waypoint management with `+ Add Checkpoint` GPS capture, cross-screen map sync, and deletion controls.
+- **Dynamic Offline Vector Maps:**
+  - Tactical canvas with pan and dynamic Zoom In (`＋`) / Zoom Out (`－`) controls with live scale meter.
+  - Multi-layer map switcher: `⛰️ Contour` topography, `🛰️ Satellite` overlay, and `▦ MGRS Grid`.
+  - Recenter button (`🎯`) targeting live device coordinates.
+  - Interactive checkpoint pins and clickable waypoint telemetry roster.
+  - Offline Map Pack Downloader with live download progress simulation and local tile caching.
 - **Tactical Distress Beacon (SOS):**
   - High-priority pulsing emergency strobe LED banner.
-  - Live GNSS & Inertial Dead Reckoning telemetry coordinates with uncertainty radius.
   - 4 one-touch SITREP incident buttons: `[01 MEDEVAC]`, `[02 LOST / SAR]`, `[03 BREAKDOWN]`, `[04 GENERAL SOS]`.
-- **Mil-Spec Bottom Navigation Bar:**
-  - Sharp tactile navigation tabs: `HUD` (Dashboard), `COMMS` (Encrypted Chat), `RADAR` (Mesh Discovery), `CONVOY` (Fleet Tracking), and `SOS` (Emergency Terminal).
+  - "Halt Distress Beacon / Stand Down" button that broadcasts an immediate stand-down alert across the mesh.
+  - Direct `View Distress Stream in Comms →` link to monitor emergency packet logs.
+- **Expedition Squads / Encrypted Groups:**
+  - Group broadcast composer with instant multi-peer envelope dispatch.
+  - Ratcheting forward-secrecy key rotation button (`🔑 Rotate Keys`).
+  - Member roster with one-on-one direct comms action buttons.
+- **Hardware Radio Settings & Diagnostics:**
+  - Editable Call-Sign with real-time global state persistence.
+  - Toggles for BLE Peripheral Advertising, BLE Central Scanning, Background Relay, and Eco-Mode.
+  - "Run Mesh Radio & Hardware Self-Test" diagnostic audit for BLE, Keystore, and GPS subsystem integrity.
+  - "Purge Local Mesh Envelopes & Cache" action to clear DTN queues and store-and-forward buffers.
 
 <br/>
 
@@ -192,7 +222,7 @@ nomad-link/
 │   │   ├── location/DeadReckoningEngine.ts  # Sensor fusion Kalman filter & drift model
 │   │   └── database/DatabaseSchema.ts       # SQLite migrations schema
 │   ├── features/                            # Tactical screens (Home, Chat, Mesh, Convoy, SOS, Maps, Groups, Settings)
-│   ├── components/                          # UI components (Buttons, Badges, FeedbackStates)
+│   ├── components/                          # UI components (Buttons, Badges, RadarScope, FeedbackStates)
 │   ├── native/NomadLinkNative.ts            # TypeScript bridge contract
 │   └── theme/NomadTheme.ts                  # Mil-Spec cyber-tactical design tokens & palette
 ├── docs/                                    # Technical documentation suite

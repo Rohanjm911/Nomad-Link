@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Modal,
+  Image,
 } from 'react-native';
 import { NomadProvider } from '../application/state/NomadContext';
 import {
@@ -27,6 +28,8 @@ import { SettingsScreen } from '../features/settings/SettingsScreen';
 
 import { useNomad } from '../application/state/NomadContext';
 
+const NOMAD_LOGO = require('../assets/images/logo.png');
+
 type NavDestination =
   | 'Home'
   | 'Messages'
@@ -38,41 +41,66 @@ type NavDestination =
   | 'Settings';
 
 export const AppContent: React.FC = () => {
-  const { identity, isRadioScanning, peers } = useNomad();
+  const {
+    identity,
+    isRadioScanning,
+    peers,
+    setActiveTargetPeerId,
+    setIdentityAlias,
+    toggleRadioScanning,
+  } = useNomad();
   const [isOnboarded, setIsOnboarded] = useState(true);
   const [activeTab, setActiveTab] = useState<NavDestination>('Home');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   if (!isOnboarded) {
-    return <OnboardingScreen onComplete={_alias => setIsOnboarded(true)} />;
+    return (
+      <OnboardingScreen
+        onComplete={alias => {
+          if (alias) setIdentityAlias(alias);
+          setIsOnboarded(true);
+        }}
+      />
+    );
   }
+
+  const navigateTo = (dest: NavDestination, peerId?: string) => {
+    if (peerId) {
+      setActiveTargetPeerId(peerId);
+    }
+    setActiveTab(dest);
+    setIsDrawerOpen(false);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'Home':
-        return <HomeScreen onNavigate={tab => setActiveTab(tab as NavDestination)} />;
+        return (
+          <HomeScreen
+            onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)}
+          />
+        );
       case 'Messages':
-        return <MessagingScreen />;
+        return <MessagingScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Mesh':
-        return <MeshScreen />;
+        return <MeshScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Convoy':
-        return <ConvoyScreen />;
+        return <ConvoyScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Maps':
-        return <OfflineMapsScreen />;
+        return <OfflineMapsScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Groups':
-        return <GroupsScreen />;
+        return <GroupsScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Emergency':
-        return <EmergencyScreen />;
+        return <EmergencyScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       case 'Settings':
-        return <SettingsScreen />;
+        return <SettingsScreen onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)} />;
       default:
-        return <HomeScreen onNavigate={tab => setActiveTab(tab as NavDestination)} />;
+        return (
+          <HomeScreen
+            onNavigate={(tab, peerId) => navigateTo(tab as NavDestination, peerId)}
+          />
+        );
     }
-  };
-
-  const navigateTo = (dest: NavDestination) => {
-    setActiveTab(dest);
-    setIsDrawerOpen(false);
   };
 
   return (
@@ -85,15 +113,29 @@ export const AppContent: React.FC = () => {
       {/* STEALTH MINIMALIST TOP BAR */}
       <View style={styles.appBar}>
         <View style={styles.appBarBrand}>
-          <View style={styles.brandIconBox}>
-            <Text style={styles.brandIcon}>●</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.brandIconBox}
+            onPress={() => navigateTo('Home')}
+            activeOpacity={0.7}
+            accessible={true}
+            accessibilityLabel="Nomad Link Home"
+          >
+            <Image source={NOMAD_LOGO} style={styles.brandLogoImage} />
+          </TouchableOpacity>
           <View>
             <View style={styles.brandTitleRow}>
-              <Text style={styles.brandName}>
-                NOMAD <Text style={styles.brandNameAccent}>LINK</Text>
-              </Text>
-              <View style={styles.rfStatusPill}>
+              <TouchableOpacity onPress={() => navigateTo('Home')} activeOpacity={0.8}>
+                <Text style={styles.brandName}>
+                  NOMAD <Text style={styles.brandNameAccent}>LINK</Text>
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.rfStatusPill}
+                onPress={() => toggleRadioScanning()}
+                activeOpacity={0.7}
+                accessible={true}
+                accessibilityLabel="Toggle Radio Scanning"
+              >
                 <View
                   style={[
                     styles.rfStatusDot,
@@ -108,7 +150,7 @@ export const AppContent: React.FC = () => {
                 >
                   {isRadioScanning ? 'Active' : 'Standby'}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
             <Text style={styles.brandTagline}>Offline P2P Mesh</Text>
           </View>
@@ -216,7 +258,10 @@ export const AppContent: React.FC = () => {
           <View style={styles.drawerContainer}>
             <View style={styles.drawerHeader}>
               <View style={styles.drawerHeaderTop}>
-                <Text style={styles.drawerTitle}>Modules & Systems</Text>
+                <View style={styles.drawerHeaderBrand}>
+                  <Image source={NOMAD_LOGO} style={styles.drawerLogoImage} />
+                  <Text style={styles.drawerTitle}>Modules & Systems</Text>
+                </View>
                 <TouchableOpacity
                   style={styles.drawerCloseBtn}
                   onPress={() => setIsDrawerOpen(false)}
@@ -360,18 +405,30 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   brandIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: DarkThemeColors.surfaceSubtle,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: DarkThemeColors.border,
+    borderColor: DarkThemeColors.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  brandIcon: {
-    fontSize: 12,
-    color: DarkThemeColors.warningAmber, // Laser orange
+  brandLogoImage: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+  },
+  drawerHeaderBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  drawerLogoImage: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
   },
   brandTitleRow: {
     flexDirection: 'row',

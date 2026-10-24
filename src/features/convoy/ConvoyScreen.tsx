@@ -18,10 +18,67 @@ import {
 import { SavedWaypointModel } from '../../domain/models/DomainModels';
 import { PrimaryButton, SecondaryButton } from '../../components/Buttons';
 import { SectionHeader } from '../../components/FeedbackStates';
+import { TextInput } from 'react-native';
 
-export const ConvoyScreen: React.FC = () => {
-  const { convoy, sendConvoyRegroup, deadReckoning } = useNomad();
+interface ConvoyScreenProps {
+  onNavigate?: (tab: string, peerId?: string) => void;
+}
+
+export const ConvoyScreen: React.FC<ConvoyScreenProps> = ({ onNavigate }) => {
+  const {
+    convoy,
+    sendConvoyRegroup,
+    deadReckoning,
+    identity,
+    updateConvoyMemberStatus,
+    addWaypoint,
+    removeWaypoint,
+  } = useNomad();
   const [isLocationSharingActive, setIsLocationSharingActive] = useState(true);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [isAddingWaypoint, setIsAddingWaypoint] = useState(false);
+  const [newWpName, setNewWpName] = useState('');
+
+  const myMember = convoy.members.find(m => m.peerId === identity.peerId) || convoy.members[1];
+  const myStatus = myMember?.status || 'MOVING';
+
+  const handleStatusChange = (status: 'MOVING' | 'STOPPED' | 'REGROUPING' | 'ASSISTANCE_REQUESTED') => {
+    updateConvoyMemberStatus(identity.peerId, status);
+    Alert.alert('Vehicle Telemetry Updated', `Convoy status transmitted: ${status}`);
+  };
+
+  const handleCreateCheckpoint = () => {
+    if (!newWpName.trim()) return;
+    addWaypoint({
+      name: newWpName.trim(),
+      latitude: deadReckoning.latitude,
+      longitude: deadReckoning.longitude,
+      altitudeMeters: 4350,
+      notes: `Recorded by ${identity.alias}`,
+    });
+    Alert.alert('Checkpoint Saved', `Added checkpoint "${newWpName}" to convoy expedition waypoints.`);
+    setNewWpName('');
+    setIsAddingWaypoint(false);
+  };
+
+  const handleWaypointAction = (wp: SavedWaypointModel) => {
+    Alert.alert(
+      `Waypoint: ${wp.name}`,
+      `Coordinates: ${wp.latitude.toFixed(4)}°N, ${wp.longitude.toFixed(4)}°E\nAltitude: ${wp.altitudeMeters || 4350}m\nNotes: ${wp.notes || 'None'}`,
+      [
+        {
+          text: 'Navigate Here (Maps)',
+          onPress: () => onNavigate && onNavigate('Maps'),
+        },
+        {
+          text: 'Remove Checkpoint',
+          style: 'destructive',
+          onPress: () => removeWaypoint(wp.id),
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
 
   const handleRegroup = () => {
     Alert.alert(
@@ -47,6 +104,8 @@ export const ConvoyScreen: React.FC = () => {
     switch (status) {
       case 'MOVING':
         return DarkThemeColors.successGreen;
+      case 'STOPPED':
+        return DarkThemeColors.secondaryText;
       case 'REGROUPING':
         return DarkThemeColors.warningAmber;
       case 'ASSISTANCE_REQUESTED':
@@ -73,6 +132,46 @@ export const ConvoyScreen: React.FC = () => {
       </View>
 
       
+      {/* MY VEHICLE TELEMETRY CONTROLS */}
+      <View style={styles.myStatusCard}>
+        <Text style={styles.myStatusTitle}>MY VEHICLE TELEMETRY STATUS</Text>
+        <View style={styles.statusChipsRow}>
+          <TouchableOpacity
+            style={[styles.statusChip, myStatus === 'MOVING' && styles.statusChipActiveGreen]}
+            onPress={() => handleStatusChange('MOVING')}
+          >
+            <Text style={[styles.statusChipText, myStatus === 'MOVING' && styles.statusChipTextActive]}>
+              ● MOVING
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.statusChip, myStatus === 'STOPPED' && styles.statusChipActiveMuted]}
+            onPress={() => handleStatusChange('STOPPED')}
+          >
+            <Text style={[styles.statusChipText, myStatus === 'STOPPED' && styles.statusChipTextActive]}>
+              ⏸ STOPPED
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.statusChip, myStatus === 'REGROUPING' && styles.statusChipActiveAmber]}
+            onPress={() => handleStatusChange('REGROUPING')}
+          >
+            <Text style={[styles.statusChipText, myStatus === 'REGROUPING' && styles.statusChipTextActive]}>
+              ★ REGROUP
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.statusChip, myStatus === 'ASSISTANCE_REQUESTED' && styles.statusChipActiveRed]}
+            onPress={() => handleStatusChange('ASSISTANCE_REQUESTED')}
+          >
+            <Text style={[styles.statusChipText, myStatus === 'ASSISTANCE_REQUESTED' && styles.statusChipTextActive]}>
+              🚨 NEED HELP
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* TACTICAL MAP CARD */}
       <View style={styles.mapCard}>
         <View style={styles.mapHeaderRow}>
           <Text style={styles.mapTitle}>TACTICAL CONVOY POSITION MAP</Text>
@@ -80,24 +179,26 @@ export const ConvoyScreen: React.FC = () => {
         </View>
 
         <View style={styles.mapCanvas}>
-          
           <View style={styles.gridLineHorizontal} />
           <View style={styles.gridLineVertical} />
 
-          
           {convoy.members.map((member, idx) => {
-            const isMe = member.peerId.includes('Alpha') || idx === 1;
+            const isMe = member.peerId === identity.peerId || member.peerId.includes('Alpha');
+            const isSelected = selectedMemberId === member.peerId;
             const topOffset = 25 + idx * 35;
             const leftOffset = 20 + idx * 30;
 
             return (
-              <View
+              <TouchableOpacity
                 key={member.peerId}
                 style={[
                   styles.mapPin,
                   { top: `${topOffset}%`, left: `${leftOffset}%` },
                   isMe && styles.myPin,
+                  isSelected && styles.selectedPin,
                 ]}
+                onPress={() => setSelectedMemberId(isSelected ? null : member.peerId)}
+                activeOpacity={0.7}
               >
                 <View
                   style={[
@@ -106,13 +207,17 @@ export const ConvoyScreen: React.FC = () => {
                   ]}
                 />
                 <Text style={styles.pinLabel}>{member.alias.split(' ')[0]}</Text>
-              </View>
+              </TouchableOpacity>
             );
           })}
 
-          <View style={styles.regroupTargetPin}>
+          <TouchableOpacity
+            style={styles.regroupTargetPin}
+            onPress={() => onNavigate && onNavigate('Maps')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.regroupTargetText}>★ REGROUP PT (Khardung La)</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.mapFooter}>
@@ -135,15 +240,22 @@ export const ConvoyScreen: React.FC = () => {
         </View>
       </View>
 
-      
+      {/* SECTION: CONVOY ROSTER */}
       <SectionHeader title="Convoy Telemetry & Formation" />
       {convoy.members.map(item => {
+        const isMe = item.peerId === identity.peerId || item.peerId.includes('Alpha');
         const statusColor = getStatusColor(item.status);
         const fixAgeSec = Math.round((Date.now() - item.lastFixTimestamp) / 1000);
         const isStale = fixAgeSec > 25;
 
         return (
-          <View key={item.peerId} style={styles.memberCard}>
+          <View
+            key={item.peerId}
+            style={[
+              styles.memberCard,
+              selectedMemberId === item.peerId && styles.memberCardHighlighted,
+            ]}
+          >
             <View style={styles.memberHeader}>
               <View style={styles.titleRow}>
                 <Text style={styles.memberAlias}>{item.alias}</Text>
@@ -202,25 +314,68 @@ export const ConvoyScreen: React.FC = () => {
                 {isStale ? `▲ Stale Fix: ${fixAgeSec}s ago` : `Fresh Fix: ${fixAgeSec}s ago`}
               </Text>
             </View>
+
+            {!isMe && (
+              <View style={styles.memberActionRow}>
+                <TouchableOpacity
+                  style={styles.messageMemberBtn}
+                  onPress={() => onNavigate && onNavigate('Messages', item.peerId)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.messageMemberText}>Direct Comms →</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         );
       })}
 
-      
-      <SectionHeader title="Expedition Waypoints" />
+      {/* SECTION: EXPEDITION WAYPOINTS */}
+      <SectionHeader
+        title="Expedition Waypoints"
+        actionText={isAddingWaypoint ? 'Cancel ✕' : '+ Add Checkpoint'}
+        onAction={() => setIsAddingWaypoint(!isAddingWaypoint)}
+      />
+
+      {isAddingWaypoint && (
+        <View style={styles.addWpCard}>
+          <Text style={styles.addWpTitle}>RECORD CHECKPOINT AT CURRENT GPS FIX</Text>
+          <TextInput
+            style={styles.addWpInput}
+            value={newWpName}
+            onChangeText={setNewWpName}
+            placeholder="e.g. Ridge Rest Area / River Crossing"
+            placeholderTextColor={DarkThemeColors.mutedText}
+          />
+          <TouchableOpacity
+            style={[styles.saveWpBtn, !newWpName.trim() && styles.btnDisabled]}
+            disabled={!newWpName.trim()}
+            onPress={handleCreateCheckpoint}
+          >
+            <Text style={styles.saveWpBtnText}>Save Waypoint to Mesh</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.waypointContainer}>
         {convoy.activeWaypoints.map((wp: SavedWaypointModel) => (
-          <View key={wp.id} style={styles.waypointItem}>
+          <TouchableOpacity
+            key={wp.id}
+            style={styles.waypointItem}
+            onPress={() => handleWaypointAction(wp)}
+            activeOpacity={0.7}
+          >
             <View>
               <Text style={styles.wpName}>{wp.name}</Text>
               <Text style={styles.wpCoords}>
                 {wp.latitude.toFixed(4)}° N, {wp.longitude.toFixed(4)}° E {wp.altitudeMeters ? `· Alt: ${wp.altitudeMeters}m` : ''}
               </Text>
+              <Text style={styles.wpSubAction}>Tap to view navigation or delete</Text>
             </View>
             <View style={styles.wpTag}>
               <Text style={styles.wpTagText}>SAVED</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </View>
     </ScrollView>
@@ -509,5 +664,135 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: DarkThemeColors.secondaryText,
     fontWeight: '700',
+  },
+  wpSubAction: {
+    ...NomadTypography.metadata,
+    fontSize: 9.5,
+    color: DarkThemeColors.actionBlue,
+    marginTop: 2,
+  },
+  myStatusCard: {
+    backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.md,
+    padding: NomadSpacing.md,
+    marginBottom: NomadSpacing.md,
+  },
+  myStatusTitle: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.mutedText,
+    letterSpacing: 0.8,
+    marginBottom: NomadSpacing.sm,
+  },
+  statusChipsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  statusChip: {
+    flex: 1,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.sm,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusChipText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 9.5,
+    color: DarkThemeColors.secondaryText,
+    fontWeight: '700',
+  },
+  statusChipActiveGreen: {
+    backgroundColor: DarkThemeColors.successGreenSubtle,
+    borderColor: DarkThemeColors.successGreen,
+  },
+  statusChipActiveMuted: {
+    backgroundColor: DarkThemeColors.surfaceElevated,
+    borderColor: DarkThemeColors.primaryText,
+  },
+  statusChipActiveAmber: {
+    backgroundColor: DarkThemeColors.warningAmberSubtle,
+    borderColor: DarkThemeColors.warningAmber,
+  },
+  statusChipActiveRed: {
+    backgroundColor: DarkThemeColors.emergencyRedSubtle,
+    borderColor: DarkThemeColors.emergencyRed,
+  },
+  statusChipTextActive: {
+    color: DarkThemeColors.primaryText,
+  },
+  selectedPin: {
+    borderColor: DarkThemeColors.warningAmber,
+    borderWidth: 2,
+  },
+  memberCardHighlighted: {
+    borderColor: DarkThemeColors.actionBlue,
+  },
+  memberActionRow: {
+    marginTop: NomadSpacing.sm,
+    paddingTop: NomadSpacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: DarkThemeColors.borderSubtle,
+    alignItems: 'flex-end',
+  },
+  messageMemberBtn: {
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: NomadRadius.full,
+  },
+  messageMemberText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.actionBlue,
+    fontWeight: '700',
+  },
+  addWpCard: {
+    backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.md,
+    padding: NomadSpacing.md,
+    marginBottom: NomadSpacing.md,
+  },
+  addWpTitle: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.mutedText,
+    letterSpacing: 0.8,
+    marginBottom: NomadSpacing.sm,
+  },
+  addWpInput: {
+    minHeight: 40,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.sm,
+    paddingHorizontal: NomadSpacing.md,
+    color: DarkThemeColors.primaryText,
+    marginBottom: NomadSpacing.sm,
+    ...NomadTypography.body,
+    fontSize: 13,
+  },
+  saveWpBtn: {
+    backgroundColor: DarkThemeColors.actionBlue,
+    paddingVertical: NomadSpacing.sm,
+    borderRadius: NomadRadius.sm,
+    alignItems: 'center',
+  },
+  saveWpBtnText: {
+    ...NomadTypography.button,
+    fontSize: 12,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  btnDisabled: {
+    opacity: 0.4,
   },
 });

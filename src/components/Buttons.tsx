@@ -70,8 +70,10 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
     const list: TextStyle[] = [styles.textBase];
     switch (variant) {
       case 'primary':
-      case 'danger':
         list.push(styles.textLight);
+        break;
+      case 'danger':
+        list.push(styles.textDanger);
         break;
       case 'tactical':
         list.push(styles.textTactical);
@@ -222,6 +224,10 @@ const styles = StyleSheet.create({
   },
   textLight: {
     color: '#000000', // Crisp stark black on white primary
+    fontWeight: '700',
+  },
+  textDanger: {
+    color: '#FFFFFF', // High-contrast stark white on danger red
     fontWeight: '700',
   },
   textTactical: {

@@ -18,7 +18,7 @@ import { TrustBadge, SignalMeter, TransportBadge } from '../../components/Badges
 import { TacticalActionButton } from '../../components/Buttons';
 
 interface HomeScreenProps {
-  onNavigate: (tab: string) => void;
+  onNavigate: (tab: string, peerId?: string) => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
@@ -62,9 +62,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               {isRadioScanning ? 'Mesh Network Active' : 'Radio Transceiver Standby'}
             </Text>
           </View>
-          <View style={styles.tacticalModeBadge}>
+          <TouchableOpacity
+            style={styles.tacticalModeBadge}
+            onPress={() => onNavigate('Settings')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.tacticalModeText}>BLE 5.2</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.hudCardBody}>
@@ -77,29 +81,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
         {/* 4-GAUGE TELEMETRY MATRIX */}
         <View style={styles.matrixGrid}>
-          <View style={styles.matrixItem}>
+          <TouchableOpacity
+            style={styles.matrixItem}
+            onPress={() => onNavigate('Mesh')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.matrixIndex}>01</Text>
             <Text style={styles.matrixValue}>{peers.length}</Text>
             <Text style={styles.matrixLabel}>Discovered</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.matrixItem}>
+          <TouchableOpacity
+            style={styles.matrixItem}
+            onPress={() => onNavigate('Mesh')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.matrixIndex}>02</Text>
             <Text style={[styles.matrixValue, { color: DarkThemeColors.tacticalGreen }]}>
               {trustedPeersCount}
             </Text>
             <Text style={styles.matrixLabel}>Verified</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.matrixItem}>
+          <TouchableOpacity
+            style={styles.matrixItem}
+            onPress={() => onNavigate('Convoy')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.matrixIndex}>03</Text>
             <Text style={[styles.matrixValue, { color: DarkThemeColors.warningAmber }]}>
               {activeMembersCount}
             </Text>
             <Text style={styles.matrixLabel}>Convoy</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.matrixItem}>
+          <TouchableOpacity
+            style={styles.matrixItem}
+            onPress={() => onNavigate('Settings')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.matrixIndex}>04</Text>
             <Text
               style={[
@@ -114,7 +134,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               {isBackgroundServiceActive ? 'Active' : 'Idle'}
             </Text>
             <Text style={styles.matrixLabel}>DTN Relay</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -151,14 +171,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
       />
 
       {peers.length === 0 ? (
-        <View style={styles.emptyCard}>
+        <TouchableOpacity
+          style={styles.emptyCard}
+          onPress={startDiscovery}
+          activeOpacity={0.8}
+        >
           <Text style={styles.emptyCardText}>
             No nodes currently within radio horizon
           </Text>
           <Text style={styles.emptyCardSub}>
-            Initiate radar sweep to detect nearby peer transceivers.
+            Tap to initiate radar sweep and detect nearby peer transceivers.
           </Text>
-        </View>
+        </TouchableOpacity>
       ) : (
         peers.slice(0, 2).map(peer => (
           <View key={peer.peerId} style={styles.peerCard}>
@@ -179,7 +203,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
               <SignalMeter rssi={peer.rssi} />
               <TouchableOpacity
                 style={styles.txActionBtn}
-                onPress={() => onNavigate('Messages')}
+                onPress={() => onNavigate('Messages', peer.peerId)}
                 activeOpacity={0.7}
               >
                 <Text style={styles.txActionText}>Message →</Text>

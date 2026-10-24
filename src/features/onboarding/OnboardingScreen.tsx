@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import {
   DarkThemeColors,
@@ -15,6 +16,8 @@ import {
   NomadTypography,
 } from '../../theme/NomadTheme';
 import { PrimaryButton, SecondaryButton } from '../../components/Buttons';
+
+const NOMAD_LOGO = require('../../assets/images/logo.png');
 
 interface OnboardingScreenProps {
   onComplete: (alias: string) => void;
@@ -30,7 +33,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const renderWelcome = () => (
     <View style={styles.stepContainer}>
       <View style={styles.brandIconContainer}>
-        <Text style={styles.brandSymbol}>⚡</Text>
+        <Image source={NOMAD_LOGO} style={styles.brandLogoImage} />
       </View>
       <Text style={styles.brandTitle}>NOMAD LINK</Text>
       <Text style={styles.brandTagline}>No Signal. No Limits.</Text>
@@ -273,16 +276,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   brandIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: NomadRadius.md,
-    backgroundColor: DarkThemeColors.brandNavy,
+    width: 80,
+    height: 80,
+    borderRadius: NomadRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderWidth: 1,
-    borderColor: DarkThemeColors.actionBlue,
+    borderColor: DarkThemeColors.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: NomadSpacing.xl,
     marginBottom: NomadSpacing.md,
+    alignSelf: 'center',
+    overflow: 'hidden',
+  },
+  brandLogoImage: {
+    width: 68,
+    height: 68,
+    resizeMode: 'contain',
   },
   brandSymbol: {
     fontSize: 32,

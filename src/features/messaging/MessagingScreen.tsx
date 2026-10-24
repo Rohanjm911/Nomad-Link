@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNomad } from '../../application/state/NomadContext';
 import {
@@ -21,11 +22,31 @@ import { DeliveryState, MessageModel } from '../../domain/models/DomainModels';
 import { TrustBadge, DeliveryStatusIndicator } from '../../components/Badges';
 import { EmptyState } from '../../components/FeedbackStates';
 
-export const MessagingScreen: React.FC = () => {
-  const { messages, peers, sendDirectMessage, identity } = useNomad();
-  const [selectedPeerId, setSelectedPeerId] = useState<string>(peers[0]?.peerId || '');
+interface MessagingScreenProps {
+  onNavigate?: (tab: string, peerId?: string) => void;
+}
+
+export const MessagingScreen: React.FC<MessagingScreenProps> = ({ onNavigate }) => {
+  const {
+    messages,
+    peers,
+    sendDirectMessage,
+    identity,
+    activeTargetPeerId,
+    setActiveTargetPeerId,
+    deadReckoning,
+  } = useNomad();
+  const [selectedPeerId, setSelectedPeerId] = useState<string>(
+    activeTargetPeerId || peers[0]?.peerId || ''
+  );
   const [inputText, setInputText] = useState('');
   const [showPeerPicker, setShowPeerPicker] = useState(false);
+
+  React.useEffect(() => {
+    if (activeTargetPeerId) {
+      setSelectedPeerId(activeTargetPeerId);
+    }
+  }, [activeTargetPeerId]);
 
   const selectedPeer = peers.find(p => p.peerId === selectedPeerId);
 
@@ -36,10 +57,18 @@ export const MessagingScreen: React.FC = () => {
       m.recipientPeerId === '*'
   );
 
-  const handleSend = () => {
-    if (!inputText.trim() || !selectedPeerId) return;
-    sendDirectMessage(selectedPeerId, inputText.trim());
-    setInputText('');
+  const handleSend = (textToSend?: string) => {
+    const content = (textToSend !== undefined ? textToSend : inputText).trim();
+    if (!content || !selectedPeerId) return;
+    sendDirectMessage(selectedPeerId, content);
+    if (textToSend === undefined) {
+      setInputText('');
+    }
+  };
+
+  const handleSendCoords = () => {
+    const coordMsg = `Current Position Report: ${deadReckoning.latitude.toFixed(5)}°N, ${deadReckoning.longitude.toFixed(5)}°E (Alt: 4350m, Fix: ${deadReckoning.isGpsActive ? 'GNSS' : 'Dead-Reckoning'}, Err: ±${deadReckoning.uncertaintyRadiusMeters}m)`;
+    handleSend(coordMsg);
   };
 
   const handleMessageInspect = (msg: MessageModel) => {
@@ -128,8 +157,10 @@ export const MessagingScreen: React.FC = () => {
         <View style={styles.emptyContainer}>
           <EmptyState
             title="Channel Clear"
-            description={`No messages exchanged yet. Compose and send encrypted packets to ${selectedPeer?.alias || 'target node'}. Messages persist in local DTN queue until delivered.`}
+            description={`No messages exchanged yet with ${selectedPeer?.alias || 'target node'}. Compose an encrypted packet or tap below for an instant radio check.`}
             icon="💬"
+            actionLabel="Send Radio Check"
+            onAction={() => handleSend('Radio check. Transceiver operational.')}
           />
         </View>
       ) : (
@@ -190,6 +221,44 @@ export const MessagingScreen: React.FC = () => {
         />
       )}
 
+      {/* QUICK TACTICAL ACTION CHIPS */}
+      <View style={styles.quickChipsStrip}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.quickChipsContent}
+        >
+          <TouchableOpacity
+            style={styles.quickChip}
+            onPress={handleSendCoords}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.quickChipText}>📍 Send Coordinates</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quickChip}
+            onPress={() => handleSend('Radio check. Requesting signal strength report.')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.quickChipText}>📻 Radio Check</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quickChip}
+            onPress={() => handleSend('Convoy hold position. Awaiting regroup.')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.quickChipText}>🚙 Convoy Hold</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.quickChip}
+            onPress={() => handleSend('Sector clear. Route passable, no hazards.')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.quickChipText}>✅ Route Clear</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
       {/* STEALTH INPUT COMPOSER */}
       <View style={styles.composerContainer}>
         <TextInput
@@ -203,7 +272,7 @@ export const MessagingScreen: React.FC = () => {
         />
         <TouchableOpacity
           style={[styles.sendBtn, !inputText.trim() && styles.sendBtnDisabled]}
-          onPress={handleSend}
+          onPress={() => handleSend()}
           disabled={!inputText.trim()}
           activeOpacity={0.8}
         >
@@ -457,5 +526,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
     fontWeight: '700',
+  },
+  quickChipsStrip: {
+    backgroundColor: '#050508',
+    paddingVertical: 6,
+    borderTopWidth: 1,
+    borderTopColor: DarkThemeColors.borderSubtle,
+  },
+  quickChipsContent: {
+    paddingHorizontal: NomadSpacing.sm,
+    gap: 6,
+  },
+  quickChip: {
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: NomadRadius.full,
+  },
+  quickChipText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '600',
   },
 });
