@@ -108,7 +108,7 @@ NOMAD LINK operates on a **Pure Ad-Hoc Peer-to-Peer (P2P)** paradigm with zero d
        |                                       |                                   5. Decrypts with PrivKey
 ```
 
-> 📖 **Deep-Dive Engineering Guide:** For complete packet wire framing, mathematical drift formulas, and sequence diagrams, see the dedicated **[HOW_IT_WORKS.md](file:///d:/projects%20and%20certificates/projects/apps/NOMAD%20LINK/docs/HOW_IT_WORKS.md)** guide.
+> 📖 **Deep-Dive Engineering Guide:** For complete packet wire framing, mathematical drift formulas, and sequence diagrams, see the dedicated **[HOW_IT_WORKS.md](file:///d:/projects%20and%20certificates/projects/apps/NOMAD%20LINK/HOW_IT_WORKS.md)** guide.
 
 ---
 
@@ -153,6 +153,7 @@ Built with a rugged **Mil-Spec Cyber-Tactical (Military Radio Style 📟)** inte
 ```
 nomad-link/
 ├── nomad-link-debug.apk                     # Compiled Android Debug APK (112 MB)
+├── HOW_IT_WORKS.md                          # Comprehensive mechanical deep-dive & packet lifecycles
 ├── babel.config.js                          # Babel config with @react-native/babel-preset
 ├── metro.config.js                          # Metro bundler configuration
 ├── package.json                             # Dependencies (React 18.3.1, RN 0.76.2)
@@ -195,7 +196,6 @@ nomad-link/
 │   ├── native/NomadLinkNative.ts            # TypeScript bridge contract
 │   └── theme/NomadTheme.ts                  # Mil-Spec cyber-tactical design tokens & palette
 ├── docs/                                    # Technical documentation suite
-│   ├── HOW_IT_WORKS.md                      # Comprehensive mechanical deep-dive & packet lifecycles
 │   ├── ARCHITECTURE.md                      # Layer separation & component boundaries
 │   ├── NETWORK_PROTOCOL.md                  # Wire framing, MTU chunking & delivery states
 │   ├── CRYPTOGRAPHY.md                      # Key lifecycles & Keystore bindings
