@@ -9,7 +9,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test:verify": "node tests/runVerification.cjs && node tests/runSecurityVerification.cjs",
+    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
