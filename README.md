@@ -73,21 +73,33 @@ Operates completely without cellular network towers, satellite internet, or cent
 
 ---
 
-## 📱 User Interface & Visual Aesthetics
+## 📟 User Interface & Mil-Spec Cyber-Tactical Aesthetics
 
-Built with a high-contrast **Tactical OLED Dark Theme** (`#0a0d10`) to minimize battery draw on AMOLED displays while maintaining sunlight legibility:
-- **Home:** Real-time mesh radio status, discovered nodes, active convoy metrics, and dead-reckoning coordinates.
-- **Messages:** E2EE chat with explicit delivery state indicators:
-  - `QUEUED_LOCALLY` ⏳ (Awaiting mesh route)
-  - `FORWARDED_TO_RELAY` ⚡ (Hop count 1..N)
-  - `DELIVERED_TO_DESTINATION` ✓✓
-  - `READ_BY_RECIPIENT` ✓✓
-- **Mesh Radar:** Nearby peer discovery with live RSSI signal strength (dBm) and trust controls (`DISCOVERED`, `VERIFICATION_PENDING`, `TRUSTED`, `BLOCKED`).
-- **Convoy Hub:** Fleet status, vehicle bearings, altitudes, waypoints, and regroup alerts.
-- **SOS Beacon:** Emergency distress trigger with situation report notes and medical severity level.
-- **Offline Maps & Navigation:** Inertial dead reckoning display, bearing calculations, and waypoint trails.
-- **Tactical Channels / Groups:** Team broadcasts and coordination channels.
-- **Settings & Config:** Keystore verification, radio diagnostics, and background service toggles.
+Built with a rugged **Mil-Spec Cyber-Tactical (Military Radio Style 📟)** interface engineered for harsh outdoor environments, night operations, and extreme glare conditions on OLED/AMOLED displays:
+
+- **Top Unified Tactical HUD:**
+  - Active RF state LED (`RF: ACTIVE` glowing green / `RF: STANDBY` amber).
+  - Node identity callsign bracket (`[NODE: NOMAD-01]`).
+  - Slide-out Hardware Drawer with direct toggles for BLE Advertising, Scanning, Wi-Fi Direct, and Battery Eco-Mode.
+- **4-Gauge Digital Telemetry Matrix:**
+  - `01 DISCOVERED`: Total RF peer nodes detected in radio perimeter.
+  - `02 VERIFIED`: Cryptographically authenticated peer nodes with active E2EE session keys.
+  - `03 CONVOY`: Fleet units currently in convoy formation.
+  - `04 DTN RELAY`: Delay-tolerant envelopes cached or forwarded across the mesh.
+- **Tactical Peer Discovery & Mesh Radar:**
+  - Real-time 4-bar RSSI Signal Meters (`|||| -64 dBm` with color-coded signal quality).
+  - Dual Mode Switcher: `// 01 NODE LIST //` (actionable peer telemetry) and `// 02 MESH TOPOLOGY //` (dynamic multi-hop node visualization).
+  - Chamfered Mil-Spec bracket chips (`[✓ VERIFIED]`, `[▲ PENDING AUTH]`, `[BLE-GATT]`).
+- **Encrypted Comms Terminal:**
+  - Cryptographic envelope security banner with recipient key fingerprint.
+  - End-to-end encrypted chat bubbles with explicit hop limit counters (`HOP 1/7`).
+  - Terminal-style monospace message composer with `TX>` prompt.
+- **Tactical Distress Beacon (SOS):**
+  - High-priority pulsing emergency strobe LED banner.
+  - Live GNSS & Inertial Dead Reckoning telemetry coordinates with uncertainty radius.
+  - 4 one-touch SITREP incident buttons: `[01 MEDEVAC]`, `[02 LOST / SAR]`, `[03 BREAKDOWN]`, `[04 GENERAL SOS]`.
+- **Mil-Spec Bottom Navigation Bar:**
+  - Sharp tactile navigation tabs: `HUD` (Dashboard), `COMMS` (Encrypted Chat), `RADAR` (Mesh Discovery), `CONVOY` (Fleet Tracking), and `SOS` (Emergency Terminal).
 
 <br/>
 
@@ -101,8 +113,9 @@ Built with a high-contrast **Tactical OLED Dark Theme** (`#0a0d10`) to minimize 
 
 ```
 nomad-link/
-├── nomad-link-debug.apk                     # Compiled Android Debug APK (111.5 MB)
+├── nomad-link-debug.apk                     # Compiled Android Debug APK (112 MB)
 ├── babel.config.js                          # Babel config with @react-native/babel-preset
+├── metro.config.js                          # Metro bundler configuration
 ├── package.json                             # Dependencies (React 18.3.1, RN 0.76.2)
 ├── tsconfig.json                            # Strict TypeScript configuration
 ├── android/                                 # Native Android build tree
@@ -116,9 +129,11 @@ nomad-link/
 │       ├── build.gradle                     # Android app build configuration (SDK 34, Java 17)
 │       └── src/main/
 │           ├── AndroidManifest.xml          # Granular BLE, Wi-Fi Direct, and Service permissions
+│           ├── assets/                      # Pre-compiled offline Hermes bytecode bundle
+│           │   └── index.android.bundle     # Hermes bytecode (1.58 MB standalone runtime)
 │           └── java/com/nomadlink/
 │               ├── MainActivity.kt          # ReactActivity entry point
-│               ├── MainApplication.kt      # Native module registration & Hermes wiring
+│               ├── MainApplication.kt      # Native module registration & Hermes bytecode wiring
 │               ├── bluetooth/NomadBleModule.kt        # BLE Peripheral Advertising & Scanning
 │               ├── wifi/NomadWifiDirectModule.kt      # Wi-Fi Direct P2P sockets
 │               ├── sensors/NomadSensorModule.kt       # Accelerometer, Gyro & Compass fusion
@@ -128,7 +143,7 @@ nomad-link/
 │   ├── proto/nomad_protocol.proto           # Protocol Buffer wire schemas
 │   └── WireProtocol.ts                      # Binary envelope framing (0x4E) & codecs
 ├── src/
-│   ├── app/App.tsx                          # Tactical bottom-tab layout & navigation
+│   ├── app/App.tsx                          # Mil-Spec top HUD & tactical bottom-tab navigation
 │   ├── application/state/NomadContext.tsx   # State machine, crypto, sensors, and router
 │   ├── domain/models/DomainModels.ts        # Typed domain entities (Peers, Convoy, etc.)
 │   ├── infrastructure/
@@ -139,7 +154,7 @@ nomad-link/
 │   ├── features/                            # Tactical screens (Home, Chat, Mesh, Convoy, SOS, Maps, Groups, Settings)
 │   ├── components/                          # UI components (Buttons, Badges, FeedbackStates)
 │   ├── native/NomadLinkNative.ts            # TypeScript bridge contract
-│   └── theme/NomadTheme.ts                  # OLED tactical design tokens
+│   └── theme/NomadTheme.ts                  # Mil-Spec cyber-tactical design tokens & palette
 ├── docs/                                    # Technical documentation suite
 │   ├── ARCHITECTURE.md                      # Layer separation & component boundaries
 │   ├── NETWORK_PROTOCOL.md                  # Wire framing, MTU chunking & delivery states
@@ -147,7 +162,8 @@ nomad-link/
 │   ├── THREAT_MODEL.md                      # Threat vectors & attack mitigations
 │   ├── ANDROID_PERMISSIONS.md               # Android 9–14+ permissions matrix
 │   ├── OFFLINE_NAVIGATION.md                # SQLite tile caching & dead reckoning formulas
-│   └── TESTING_AND_LIMITATIONS.md           # Physical testing guide & honest boundaries
+│   ├── TESTING.md                           # Physical testing runbook & field procedures
+│   └── KNOWN_LIMITATIONS.md                 # Radio boundaries & device-specific constraints
 └── tests/
     ├── runVerification.cjs                  # Automated protocol & engine verification suite
     ├── runSecurityVerification.cjs          # Automated adversarial threat mitigation suite
@@ -178,7 +194,20 @@ Ensure `android/local.properties` exists and points to your Android SDK director
 sdk.dir=C:\\Users\\<Username>\\AppData\\Local\\Android\\Sdk
 ```
 
-### 3. Build Android Debug APK
+### 3. Compile Standalone Offline Hermes Bundle
+NOMAD LINK is built to launch directly without requiring an active Metro dev server:
+```powershell
+# 1. Generate JavaScript bundle
+npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output temp_bundle.js
+
+# 2. Compile into Hermes bytecode binary
+.\node_modules\react-native\sdks\hermesc\win64-bin\hermesc.exe -emit-binary -out android\app\src\main\assets\index.android.bundle temp_bundle.js
+
+# 3. Clean up intermediate bundle
+Remove-Item temp_bundle.js -Force
+```
+
+### 4. Build Android Debug APK
 ```powershell
 cd android
 .\gradlew.bat assembleDebug
