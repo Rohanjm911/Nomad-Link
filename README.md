@@ -73,6 +73,45 @@ Operates completely without cellular network towers, satellite internet, or cent
 
 ---
 
+## 🧠 How It Works (At A Glance)
+
+NOMAD LINK operates on a **Pure Ad-Hoc Peer-to-Peer (P2P)** paradigm with zero dependence on cell towers or internet routers:
+
+```
+[ Centralized Mobile Network ]           [ NOMAD LINK Decentralized Mesh ]
+         (Cell Tower)                                 (Node Alpha)
+        /     |      \                                  /    \  BLE 5.0
+     (A)     (B)     (C)                         (Node Bravo)---(Node Charlie)
+   [Single Point of Failure]                          \         /  Wi-Fi Direct
+                                                       (Node Delta)
+```
+
+### The 4-Step Operational Flow:
+1. **Decentralized RF Discovery:** Nodes continuously broadcast and scan for custom 16-bit BLE Service UUIDs (`0xFEF0`). Wi-Fi Direct sockets autonomously spin up for high-speed map and payload sync.
+2. **Zero-Trust Cryptographic Envelope:** Every packet is framed in a binary envelope (`0x4E`). Payloads are encrypted via authenticated ChaCha20-Poly1305 / AES-256-GCM using hardware Android Keystore (StrongBox/TEE) keys. Relays forward envelopes blindly without plaintext access.
+3. **Store-and-Forward DTN Routing:** If the destination is out of direct radio range, intermediate moving nodes (vehicles, hikers) store the encrypted envelope in a bounded memory buffer. As nodes physically travel, they opportunistically deliver the packet when proximity is established.
+4. **Inertial Dead Reckoning:** If satellite GNSS fix drops in slot canyons or tunnels, the sensor fusion engine (3-axis Accelerometer + Gyroscope + Compass) estimates velocity and heading, dynamically expanding the uncertainty radius on screen.
+
+```
+[ ALICE (Originator) ]                 [ BOB (Moving Relay) ]                [ CHARLIE (Destination) ]
+       |                                       |                                         |
+   1. Encrypts with Charlie's PK               |                                         |
+   2. Transmits 0x4E Envelope                  |                                         |
+       |--- BLE Radio (RSSI: -68 dBm) -------->|                                         |
+       |                                 3. Caches in DTN Buffer                         |
+       |                                       |                                         |
+       |                                 [ Bob rides 1 km ]                              |
+       |                                       |                                         |
+       |                                       |--- BLE Contact (GATT Connect) --------->|
+       |                                       |--- Flushes Stored Envelope ------------>|
+       |                                       |                                   4. Authenticates MAC
+       |                                       |                                   5. Decrypts with PrivKey
+```
+
+> 📖 **Deep-Dive Engineering Guide:** For complete packet wire framing, mathematical drift formulas, and sequence diagrams, see the dedicated **[HOW_IT_WORKS.md](file:///d:/projects%20and%20certificates/projects/apps/NOMAD%20LINK/docs/HOW_IT_WORKS.md)** guide.
+
+---
+
 ## 📟 User Interface & Mil-Spec Cyber-Tactical Aesthetics
 
 Built with a rugged **Mil-Spec Cyber-Tactical (Military Radio Style 📟)** interface engineered for harsh outdoor environments, night operations, and extreme glare conditions on OLED/AMOLED displays:
@@ -156,6 +195,7 @@ nomad-link/
 │   ├── native/NomadLinkNative.ts            # TypeScript bridge contract
 │   └── theme/NomadTheme.ts                  # Mil-Spec cyber-tactical design tokens & palette
 ├── docs/                                    # Technical documentation suite
+│   ├── HOW_IT_WORKS.md                      # Comprehensive mechanical deep-dive & packet lifecycles
 │   ├── ARCHITECTURE.md                      # Layer separation & component boundaries
 │   ├── NETWORK_PROTOCOL.md                  # Wire framing, MTU chunking & delivery states
 │   ├── CRYPTOGRAPHY.md                      # Key lifecycles & Keystore bindings
