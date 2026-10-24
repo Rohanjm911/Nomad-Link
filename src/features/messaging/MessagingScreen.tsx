@@ -60,7 +60,7 @@ export const MessagingScreen: React.FC = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       
-      {/* TOP TACTICAL COMMS HEADER */}
+      {/* TOP STEALTH COMMS HEADER */}
       <View style={styles.topHeader}>
         <View style={styles.peerSelectRow}>
           <TouchableOpacity
@@ -70,9 +70,9 @@ export const MessagingScreen: React.FC = () => {
           >
             <View>
               <View style={styles.peerTitleRow}>
-                <Text style={styles.channelPrefix}>TARGET NODE //</Text>
+                <Text style={styles.channelPrefix}>To</Text>
                 <Text style={styles.peerSelectAlias}>
-                  {selectedPeer ? selectedPeer.alias.toUpperCase() : 'SELECT TARGET'}
+                  {selectedPeer ? selectedPeer.alias : 'Select Target'}
                 </Text>
                 <Text style={styles.dropdownIcon}>{showPeerPicker ? '▲' : '▼'}</Text>
               </View>
@@ -88,8 +88,9 @@ export const MessagingScreen: React.FC = () => {
 
         {/* CRYPTOGRAPHIC INTEGRITY BANNER */}
         <View style={styles.e2eeBanner}>
+          <View style={styles.e2eeDot} />
           <Text style={styles.e2eeText}>
-            [SECURE DTN // X25519 ECDH + CHACHA20-POLY1305 · RELAYS ZERO-KNOWLEDGE]
+            E2EE Encrypted · X25519 + ChaCha20-Poly1305 · Zero-Knowledge Relay
           </Text>
         </View>
       </View>
@@ -97,7 +98,7 @@ export const MessagingScreen: React.FC = () => {
       {/* PEER PICKER DROPDOWN */}
       {showPeerPicker && (
         <View style={styles.peerDropdownList}>
-          <Text style={styles.dropdownTitle}>// DISCOVERED ADJACENT NODES //</Text>
+          <Text style={styles.dropdownTitle}>Discovered Nearby Nodes</Text>
           {peers.map(p => (
             <TouchableOpacity
               key={p.peerId}
@@ -111,7 +112,7 @@ export const MessagingScreen: React.FC = () => {
               }}
             >
               <View>
-                <Text style={styles.dropdownPeerAlias}>[{p.alias.toUpperCase()}]</Text>
+                <Text style={styles.dropdownPeerAlias}>{p.alias}</Text>
                 <Text style={styles.dropdownPeerMeta}>
                   {p.transportType} · FP: {p.safetyNumber}
                 </Text>
@@ -126,8 +127,8 @@ export const MessagingScreen: React.FC = () => {
       {activeMessages.length === 0 ? (
         <View style={styles.emptyContainer}>
           <EmptyState
-            title="NO TRANSMISSIONS EXCHANGED"
-            description={`Channel clear. Compose and transmit encrypted store-and-forward telemetry to ${selectedPeer?.alias || 'target node'}. Packets persist in local DTN queue until relay hop established.`}
+            title="Channel Clear"
+            description={`No messages exchanged yet. Compose and send encrypted packets to ${selectedPeer?.alias || 'target node'}. Messages persist in local DTN queue until delivered.`}
             icon="💬"
           />
         </View>
@@ -150,19 +151,18 @@ export const MessagingScreen: React.FC = () => {
               >
                 {item.isEmergency && (
                   <View style={styles.emergencyTag}>
-                    <Text style={styles.emergencyTagText}>[🚨 PRIORITY DISTRESS ENVELOPE]</Text>
+                    <Text style={styles.emergencyTagText}>🚨 Emergency SOS Envelope</Text>
                   </View>
                 )}
 
                 <View style={styles.bubbleHeaderRow}>
                   <Text style={styles.bubbleSender}>
-                    {isMe ? 'TX // LOCAL NODE' : `RX // ${selectedPeer?.alias?.toUpperCase() || 'NODE'}`}
+                    {isMe ? 'You' : selectedPeer?.alias || 'Node'}
                   </Text>
                   <Text style={styles.messageTime}>
                     {new Date(item.timestamp).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
-                      second: '2-digit',
                     })}
                   </Text>
                 </View>
@@ -180,7 +180,7 @@ export const MessagingScreen: React.FC = () => {
                     />
                   ) : (
                     <Text style={styles.hopMetaText}>
-                      [HOP {item.hopCount || 0} · AUTH VALID]
+                      Hop {item.hopCount || 0} · Verified
                     </Text>
                   )}
                 </View>
@@ -190,16 +190,13 @@ export const MessagingScreen: React.FC = () => {
         />
       )}
 
-      {/* TACTICAL INPUT COMPOSER */}
+      {/* STEALTH INPUT COMPOSER */}
       <View style={styles.composerContainer}>
-        <View style={styles.txPrefixWrap}>
-          <Text style={styles.txPrefixText}>TX&gt;</Text>
-        </View>
         <TextInput
           style={styles.inputField}
           value={inputText}
           onChangeText={setInputText}
-          placeholder={`// ENCRYPTED PAYLOAD TO ${selectedPeer?.alias?.toUpperCase() || 'TARGET'} //`}
+          placeholder={`Message ${selectedPeer?.alias || 'target'}...`}
           placeholderTextColor={DarkThemeColors.mutedText}
           multiline
           maxLength={500}
@@ -210,7 +207,7 @@ export const MessagingScreen: React.FC = () => {
           disabled={!inputText.trim()}
           activeOpacity={0.8}
         >
-          <Text style={styles.sendIcon}>TX</Text>
+          <Text style={styles.sendIcon}>↑</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -243,67 +240,75 @@ const styles = StyleSheet.create({
   peerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   channelPrefix: {
-    ...NomadTypography.monoSmall,
+    ...NomadTypography.metadata,
     color: DarkThemeColors.mutedText,
-    fontSize: 9,
-    fontWeight: '800',
+    fontSize: 11,
+    fontWeight: '500',
   },
   peerSelectAlias: {
-    ...NomadTypography.mono,
-    color: DarkThemeColors.tacticalCyan,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    ...NomadTypography.sectionHeading,
+    color: DarkThemeColors.primaryText,
+    fontSize: 14,
+    fontWeight: '600',
   },
   peerSelectMeta: {
-    ...NomadTypography.monoSmall,
+    ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
-    fontSize: 9.5,
+    fontSize: 10,
     marginTop: 1,
   },
   dropdownIcon: {
-    fontSize: 8,
-    color: DarkThemeColors.tacticalCyan,
-    marginLeft: 4,
+    fontSize: 9,
+    color: DarkThemeColors.mutedText,
+    marginLeft: 2,
   },
   e2eeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.borderSubtle,
-    borderRadius: NomadRadius.xs,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginTop: NomadSpacing.xs,
+    borderRadius: NomadRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: NomadSpacing.xs + 2,
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  e2eeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: DarkThemeColors.tacticalGreen,
   },
   e2eeText: {
-    ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalGreen,
-    fontSize: 8.5,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    ...NomadTypography.metadata,
+    color: DarkThemeColors.secondaryText,
+    fontSize: 9.5,
+    fontWeight: '500',
   },
   peerDropdownList: {
     backgroundColor: DarkThemeColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: DarkThemeColors.tacticalCyan,
+    borderBottomColor: DarkThemeColors.border,
     padding: NomadSpacing.md,
   },
   dropdownTitle: {
-    ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalCyan,
-    fontSize: 9,
-    letterSpacing: 1.0,
-    fontWeight: '800',
+    ...NomadTypography.metadata,
+    color: DarkThemeColors.mutedText,
+    fontSize: 10,
+    fontWeight: '600',
     marginBottom: NomadSpacing.xs,
+    textTransform: 'uppercase',
   },
   peerDropdownItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: NomadSpacing.xs + 3,
+    paddingVertical: NomadSpacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: DarkThemeColors.borderSubtle,
   },
@@ -311,15 +316,15 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surfaceSubtle,
   },
   dropdownPeerAlias: {
-    ...NomadTypography.mono,
+    ...NomadTypography.sectionHeading,
     color: DarkThemeColors.primaryText,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
   },
   dropdownPeerMeta: {
-    ...NomadTypography.monoSmall,
+    ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
-    fontSize: 9,
+    fontSize: 10,
     marginTop: 1,
   },
   emptyContainer: {
@@ -332,45 +337,39 @@ const styles = StyleSheet.create({
     paddingBottom: NomadSpacing.lg,
   },
   messageBubble: {
-    maxWidth: '85%',
-    padding: NomadSpacing.sm + 2,
-    borderRadius: NomadRadius.xs,
-    marginBottom: NomadSpacing.xs + 3,
+    maxWidth: '82%',
+    padding: NomadSpacing.md,
+    borderRadius: NomadRadius.lg,
+    marginBottom: NomadSpacing.sm,
     borderWidth: 1,
   },
   messageIncoming: {
     alignSelf: 'flex-start',
     backgroundColor: DarkThemeColors.surface,
     borderColor: DarkThemeColors.border,
-    borderLeftWidth: 3,
-    borderLeftColor: DarkThemeColors.tacticalGreen,
   },
   messageOutgoing: {
     alignSelf: 'flex-end',
-    backgroundColor: DarkThemeColors.surfaceSubtle,
+    backgroundColor: DarkThemeColors.surfaceElevated,
     borderColor: DarkThemeColors.border,
-    borderRightWidth: 3,
-    borderRightColor: DarkThemeColors.tacticalCyan,
   },
   emergencyBubble: {
     borderColor: DarkThemeColors.emergencyRed,
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
-    borderLeftWidth: 3,
-    borderLeftColor: DarkThemeColors.emergencyRed,
   },
   emergencyTag: {
     backgroundColor: DarkThemeColors.emergencyRed,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: NomadRadius.xs,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: NomadRadius.full,
     alignSelf: 'flex-start',
     marginBottom: 4,
   },
   emergencyTagText: {
-    ...NomadTypography.monoSmall,
+    ...NomadTypography.metadata,
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 8.5,
+    fontWeight: '700',
+    fontSize: 9,
   },
   bubbleHeaderRow: {
     flexDirection: 'row',
@@ -380,15 +379,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   bubbleSender: {
-    ...NomadTypography.monoSmall,
-    fontSize: 8.5,
+    ...NomadTypography.metadata,
+    fontSize: 9.5,
     color: DarkThemeColors.mutedText,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   messageText: {
     ...NomadTypography.body,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 13.5,
+    lineHeight: 19,
   },
   textIn: {
     color: DarkThemeColors.primaryText,
@@ -405,73 +404,58 @@ const styles = StyleSheet.create({
   messageTime: {
     ...NomadTypography.monoSmall,
     color: DarkThemeColors.mutedText,
-    fontSize: 8.5,
+    fontSize: 9,
   },
   deliveryBadge: {
     marginLeft: NomadSpacing.xs,
   },
   hopMetaText: {
     ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalGreen,
-    fontSize: 8.5,
-    fontWeight: '700',
+    color: DarkThemeColors.secondaryText,
+    fontSize: 9,
+    fontWeight: '500',
   },
   composerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: NomadSpacing.xs + 2,
-    backgroundColor: DarkThemeColors.surface,
+    padding: NomadSpacing.sm,
+    backgroundColor: '#000000',
     borderTopWidth: 1,
-    borderTopColor: DarkThemeColors.border,
-    gap: 6,
-  },
-  txPrefixWrap: {
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    backgroundColor: DarkThemeColors.surfaceSubtle,
-    borderRadius: NomadRadius.xs,
-    borderWidth: 1,
-    borderColor: DarkThemeColors.borderSubtle,
-  },
-  txPrefixText: {
-    ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalCyan,
-    fontWeight: '900',
-    fontSize: 10,
+    borderTopColor: DarkThemeColors.borderSubtle,
+    gap: 8,
   },
   inputField: {
     flex: 1,
-    minHeight: 38,
+    minHeight: 40,
     maxHeight: 100,
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.xs,
-    paddingHorizontal: NomadSpacing.sm,
-    paddingVertical: 6,
+    borderRadius: NomadRadius.full,
+    paddingHorizontal: NomadSpacing.md,
+    paddingVertical: 8,
     color: DarkThemeColors.primaryText,
-    ...NomadTypography.monoSmall,
-    fontSize: 11,
+    ...NomadTypography.body,
+    fontSize: 13,
   },
   sendBtn: {
-    width: 44,
+    width: 38,
     height: 38,
-    borderRadius: NomadRadius.xs,
-    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: DarkThemeColors.tacticalCyan,
+    borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   sendBtnDisabled: {
+    backgroundColor: DarkThemeColors.surfaceSubtle,
     borderColor: DarkThemeColors.borderSubtle,
-    opacity: 0.4,
+    opacity: 0.3,
   },
   sendIcon: {
-    ...NomadTypography.monoSmall,
-    fontSize: 11,
-    color: DarkThemeColors.tacticalCyan,
-    fontWeight: '900',
-    letterSpacing: 0.8,
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: '700',
   },
 });

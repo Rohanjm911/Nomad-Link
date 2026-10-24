@@ -16,7 +16,7 @@ export const EmptyState: React.FC<{
       <View style={styles.radarRing}>
         <Text style={styles.icon}>{icon}</Text>
       </View>
-      <Text style={styles.title}>[ {title.toUpperCase()} ]</Text>
+      <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
       {actionLabel && onAction ? (
         <View style={styles.actionWrap}>
@@ -38,7 +38,7 @@ export const ErrorState: React.FC<{
     <View style={[styles.container, styles.errorContainer, style]}>
       <Text style={styles.errorIcon}>⚠️</Text>
       <Text style={[styles.title, { color: DarkThemeColors.emergencyRed }]}>
-        [ALERT: {title.toUpperCase()}]
+        Alert: {title}
       </Text>
       <Text style={styles.description}>{message}</Text>
       {onRetry ? (
@@ -60,11 +60,11 @@ export const SectionHeader: React.FC<{
     <View style={[styles.sectionHeaderRow, style]}>
       <View style={styles.titleWrap}>
         <View style={styles.sectionDot} />
-        <Text style={styles.sectionTitle}>// {title.toUpperCase()} //</Text>
+        <Text style={styles.sectionTitle}>{title}</Text>
       </View>
       {actionText && onAction ? (
         <Text style={styles.sectionAction} onPress={onAction}>
-          [{actionText}]
+          {actionText}
         </Text>
       ) : null}
     </View>
@@ -73,22 +73,21 @@ export const SectionHeader: React.FC<{
 
 const styles = StyleSheet.create({
   container: {
-    padding: NomadSpacing.lg,
+    padding: NomadSpacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: DarkThemeColors.surface,
-    borderRadius: NomadRadius.xs,
+    borderRadius: NomadRadius.md,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
     marginVertical: NomadSpacing.md,
   },
   radarRing: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: NomadSpacing.md,
@@ -99,19 +98,18 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
   },
   icon: {
-    fontSize: 26,
+    fontSize: 24,
   },
   errorIcon: {
-    fontSize: 26,
+    fontSize: 24,
     marginBottom: NomadSpacing.sm,
     color: DarkThemeColors.emergencyRed,
   },
   title: {
-    ...NomadTypography.mono,
+    ...NomadTypography.sectionHeading,
     color: DarkThemeColors.primaryText,
     textAlign: 'center',
     marginBottom: NomadSpacing.xs,
-    letterSpacing: 1.2,
   },
   description: {
     ...NomadTypography.supporting,
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
   actionWrap: {
     marginTop: NomadSpacing.md,
     width: '100%',
-    maxWidth: 240,
+    maxWidth: 220,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -141,21 +139,22 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   sectionDot: {
-    width: 4,
-    height: 4,
-    backgroundColor: DarkThemeColors.tacticalCyan,
-    borderRadius: 1,
+    width: 6,
+    height: 6,
+    backgroundColor: DarkThemeColors.warningAmber, // Laser orange dot
+    borderRadius: 3,
   },
   sectionTitle: {
-    ...NomadTypography.monoSmall,
-    color: DarkThemeColors.mutedText,
-    letterSpacing: 1.2,
-    fontWeight: '800',
+    ...NomadTypography.metadata,
+    color: DarkThemeColors.primaryText,
+    letterSpacing: 0.5,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   sectionAction: {
-    ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalCyan,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    ...NomadTypography.metadata,
+    color: DarkThemeColors.warningAmber,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

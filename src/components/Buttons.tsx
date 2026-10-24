@@ -109,12 +109,12 @@ export const PrimaryButton: React.FC<BaseButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' || variant === 'danger' ? '#FFFFFF' : DarkThemeColors.tacticalCyan}
+          color={variant === 'primary' ? '#000000' : '#FFFFFF'}
         />
       ) : (
         <View style={styles.contentRow}>
           {icon ? <Text style={styles.iconStyle}>{icon}</Text> : null}
-          <Text style={getTextStyles()}>{label.toUpperCase()}</Text>
+          <Text style={getTextStyles()}>{label}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -137,16 +137,18 @@ export const TacticalActionButton: React.FC<{
   disabled?: boolean;
   style?: ViewStyle;
 }> = ({ label, icon, onPress, accent = 'cyan', disabled, style }) => {
-  let borderColor = DarkThemeColors.tacticalCyan;
-  let textColor = DarkThemeColors.tacticalCyan;
+  let borderColor = DarkThemeColors.border;
+  let textColor = DarkThemeColors.primaryText;
   let bgColor = DarkThemeColors.surfaceSubtle;
 
   if (accent === 'green') {
     borderColor = DarkThemeColors.tacticalGreen;
     textColor = DarkThemeColors.tacticalGreen;
+    bgColor = DarkThemeColors.successGreenSubtle;
   } else if (accent === 'amber') {
-    borderColor = DarkThemeColors.tacticalAmber;
-    textColor = DarkThemeColors.tacticalAmber;
+    borderColor = DarkThemeColors.warningAmber;
+    textColor = DarkThemeColors.warningAmber;
+    bgColor = DarkThemeColors.warningAmberSubtle;
   } else if (accent === 'red') {
     borderColor = DarkThemeColors.emergencyRed;
     textColor = DarkThemeColors.emergencyRed;
@@ -161,18 +163,18 @@ export const TacticalActionButton: React.FC<{
       activeOpacity={0.7}
     >
       {icon ? <Text style={[styles.tacticalActionIcon, { color: textColor }]}>{icon}</Text> : null}
-      <Text style={[styles.tacticalActionText, { color: textColor }]}>[{label.toUpperCase()}]</Text>
+      <Text style={[styles.tacticalActionText, { color: textColor }]}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   buttonBase: {
-    minHeight: 44,
-    borderRadius: NomadRadius.xs,
+    minHeight: 46,
+    borderRadius: NomadRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: NomadSpacing.md,
+    paddingHorizontal: NomadSpacing.lg,
     paddingVertical: NomadSpacing.sm,
     borderWidth: 1,
     borderColor: 'transparent',
@@ -187,23 +189,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   btnPrimary: {
-    backgroundColor: DarkThemeColors.surfaceElevated,
-    borderColor: DarkThemeColors.tacticalCyan,
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#FFFFFF',
   },
   btnTactical: {
-    backgroundColor: DarkThemeColors.tacticalPanel,
-    borderColor: DarkThemeColors.tacticalGreen,
-    borderWidth: 1,
+    backgroundColor: DarkThemeColors.warningAmber, // Laser Orange
+    borderColor: DarkThemeColors.warningAmber,
   },
   btnSecondary: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderColor: DarkThemeColors.border,
   },
   btnDanger: {
-    backgroundColor: DarkThemeColors.emergencyRedSubtle,
+    backgroundColor: DarkThemeColors.emergencyRed,
     borderColor: DarkThemeColors.emergencyRed,
-    borderWidth: 1,
   },
   btnOutline: {
     backgroundColor: 'transparent',
@@ -216,22 +215,24 @@ const styles = StyleSheet.create({
   btnDisabled: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderColor: DarkThemeColors.borderSubtle,
-    opacity: 0.5,
+    opacity: 0.4,
   },
   textBase: {
     ...NomadTypography.button,
   },
   textLight: {
-    color: DarkThemeColors.primaryText,
+    color: '#000000', // Crisp stark black on white primary
+    fontWeight: '700',
   },
   textTactical: {
-    color: DarkThemeColors.tacticalGreen,
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   textSecondary: {
     color: DarkThemeColors.primaryText,
   },
   textOutline: {
-    color: DarkThemeColors.tacticalCyan,
+    color: DarkThemeColors.primaryText,
   },
   textSubtle: {
     color: DarkThemeColors.secondaryText,
@@ -243,18 +244,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: NomadSpacing.sm,
-    paddingVertical: NomadSpacing.xs + 2,
-    borderRadius: NomadRadius.xs,
+    paddingHorizontal: NomadSpacing.md,
+    paddingVertical: 6,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
-    gap: 4,
+    gap: 5,
   },
   tacticalActionIcon: {
     fontSize: 12,
   },
   tacticalActionText: {
-    ...NomadTypography.monoSmall,
-    fontWeight: '800',
-    letterSpacing: 1.0,
+    ...NomadTypography.metadata,
+    fontWeight: '600',
   },
 });

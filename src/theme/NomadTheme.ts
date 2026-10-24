@@ -8,12 +8,15 @@ export interface ThemeColors {
   border: string;
   borderSubtle: string;
   borderFocus: string;
+  borderLight: string;
 
   primaryText: string;
   secondaryText: string;
   mutedText: string;
   inverseText: string;
 
+  accent: string;
+  accentSubtle: string;
   brandNavy: string;
   actionBlue: string;
   actionBlueHover: string;
@@ -46,12 +49,15 @@ export const LightThemeColors: ThemeColors = {
   border: '#CFD9E3',
   borderSubtle: '#E2E8F0',
   borderFocus: '#00838F',
+  borderLight: '#CBD5E1',
 
   primaryText: '#0F172A',
   secondaryText: '#475569',
   mutedText: '#64748B',
   inverseText: '#FFFFFF',
 
+  accent: '#00838F',
+  accentSubtle: '#E0F7FA',
   brandNavy: '#0F2942',
   actionBlue: '#00838F',
   actionBlueHover: '#006064',
@@ -76,42 +82,45 @@ export const LightThemeColors: ThemeColors = {
 };
 
 export const DarkThemeColors: ThemeColors = {
-  // Rugged Matte Black & Gunmetal
-  primaryBackground: '#080C10',
-  surface: '#0F1620',
-  surfaceSubtle: '#151F2C',
-  surfaceElevated: '#1B2737',
-  border: '#233446',
-  borderSubtle: '#182432',
-  borderFocus: '#00E5FF',
+  // Pure Pitch Black OLED & Minimalist Graphite
+  primaryBackground: '#000000',
+  surface: '#0A0A0C',
+  surfaceSubtle: '#121215',
+  surfaceElevated: '#18181D',
+  border: '#24242A',
+  borderSubtle: '#18181C',
+  borderFocus: '#FF5500', // Laser Safety Orange
+  borderLight: '#33333C',
 
-  // High Contrast Text
-  primaryText: '#E6EDF3',
-  secondaryText: '#8B9EB0',
-  mutedText: '#5A6C7E',
-  inverseText: '#080C10',
+  // Stark High-Contrast Typography
+  primaryText: '#FFFFFF',
+  secondaryText: '#A1A1AA',
+  mutedText: '#71717A',
+  inverseText: '#000000',
 
-  brandNavy: '#102235',
-  actionBlue: '#00E5FF',
-  actionBlueHover: '#00B4D8',
-  actionBlueSubtle: '#092535',
-  successGreen: '#00FF66',
-  successGreenSubtle: '#062916',
-  warningAmber: '#FFB000',
-  warningAmberSubtle: '#2E2004',
-  emergencyRed: '#FF2A2A',
-  emergencyRedSubtle: '#380909',
+  accent: '#FF5500', // Laser Safety Orange
+  accentSubtle: '#260E02',
+  brandNavy: '#0A0A0C',
+  actionBlue: '#FFFFFF',
+  actionBlueHover: '#E4E4E7',
+  actionBlueSubtle: '#18181D',
+  successGreen: '#10B981',
+  successGreenSubtle: '#06231A',
+  warningAmber: '#FF5500',
+  warningAmberSubtle: '#260E02',
+  emergencyRed: '#FF3B30',
+  emergencyRedSubtle: '#240807',
 
-  rssiStrong: '#00FF66',
-  rssiMedium: '#FFB000',
-  rssiWeak: '#FF2A2A',
+  rssiStrong: '#10B981',
+  rssiMedium: '#FF5500',
+  rssiWeak: '#FF3B30',
 
-  tacticalGreen: '#00FF66',
-  tacticalAmber: '#FFB000',
-  tacticalCyan: '#00E5FF',
-  tacticalGrid: '#182535',
-  tacticalDark: '#080C10',
-  tacticalPanel: '#0F1620',
+  tacticalGreen: '#10B981',
+  tacticalAmber: '#FF5500',
+  tacticalCyan: '#38BDF8',
+  tacticalGrid: '#18181C',
+  tacticalDark: '#000000',
+  tacticalPanel: '#0A0A0C',
 };
 
 export const NomadSpacing = {
@@ -126,11 +135,11 @@ export const NomadSpacing = {
 
 export const NomadRadius = {
   none: 0,
-  xs: 2,
-  sm: 4,
-  md: 6,
-  lg: 8,
-  xl: 12,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
   full: 9999,
 };
 
@@ -138,20 +147,20 @@ export const NomadTypography = {
   display: {
     fontSize: 26,
     lineHeight: 32,
-    fontWeight: '800' as const,
-    letterSpacing: 1.5,
+    fontWeight: '700' as const,
+    letterSpacing: -0.5,
   },
   screenHeading: {
     fontSize: 20,
     lineHeight: 26,
-    fontWeight: '800' as const,
-    letterSpacing: 1.2,
+    fontWeight: '700' as const,
+    letterSpacing: -0.3,
   },
   sectionHeading: {
-    fontSize: 16,
-    lineHeight: 22,
-    fontWeight: '700' as const,
-    letterSpacing: 1.0,
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '600' as const,
+    letterSpacing: 0.2,
   },
   body: {
     fontSize: 14,
@@ -161,7 +170,7 @@ export const NomadTypography = {
   bodyMedium: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '600' as const,
+    fontWeight: '500' as const,
   },
   supporting: {
     fontSize: 12,
@@ -171,39 +180,39 @@ export const NomadTypography = {
   supportingMedium: {
     fontSize: 12,
     lineHeight: 17,
-    fontWeight: '600' as const,
+    fontWeight: '500' as const,
   },
   metadata: {
     fontSize: 11,
     lineHeight: 15,
-    fontWeight: '600' as const,
-    letterSpacing: 0.8,
+    fontWeight: '500' as const,
+    letterSpacing: 0.3,
   },
   button: {
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: '700' as const,
-    letterSpacing: 1.2,
+    fontWeight: '600' as const,
+    letterSpacing: 0.4,
   },
   mono: {
     fontSize: 12,
     lineHeight: 16,
     fontFamily: 'monospace',
-    fontWeight: '600' as const,
-    letterSpacing: 0.5,
+    fontWeight: '500' as const,
+    letterSpacing: 0.2,
   },
   monoSmall: {
     fontSize: 10,
     lineHeight: 14,
     fontFamily: 'monospace',
-    fontWeight: '600' as const,
-    letterSpacing: 0.5,
+    fontWeight: '500' as const,
+    letterSpacing: 0.2,
   },
   hudLabel: {
     fontSize: 10,
     lineHeight: 13,
-    fontWeight: '800' as const,
-    letterSpacing: 1.4,
+    fontWeight: '700' as const,
+    letterSpacing: 0.8,
     textTransform: 'uppercase' as const,
   },
 };
@@ -217,10 +226,10 @@ export const NomadTheme = {
 
     brandNavy: DarkThemeColors.brandNavy,
     actionBlue: DarkThemeColors.actionBlue,
-    accent: DarkThemeColors.actionBlue,
-    accentLight: '#60A5FA',
-    accentDark: '#1D4ED8',
-    accentDim: DarkThemeColors.actionBlueSubtle,
+    accent: DarkThemeColors.warningAmber, // Laser Orange
+    accentLight: '#FF8844',
+    accentDark: '#CC4400',
+    accentDim: DarkThemeColors.warningAmberSubtle,
 
     emergencyRed: DarkThemeColors.emergencyRed,
     emergencyRedDim: DarkThemeColors.emergencyRedSubtle,
@@ -228,8 +237,8 @@ export const NomadTheme = {
     successGreenDim: DarkThemeColors.successGreenSubtle,
     warningAmber: DarkThemeColors.warningAmber,
     warningAmberDim: DarkThemeColors.warningAmberSubtle,
-    infoBlue: DarkThemeColors.actionBlue,
-    infoBlueDim: DarkThemeColors.actionBlueSubtle,
+    infoBlue: DarkThemeColors.tacticalCyan,
+    infoBlueDim: '#0C202F',
 
     textPrimary: DarkThemeColors.primaryText,
     textSecondary: DarkThemeColors.secondaryText,

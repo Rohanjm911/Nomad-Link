@@ -38,7 +38,7 @@ export const MeshScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* TACTICAL RADAR HUD HEADER */}
+      {/* RADAR HUD HEADER */}
       <View style={styles.header}>
         <View>
           <View style={styles.headerTitleRow}>
@@ -48,12 +48,12 @@ export const MeshScreen: React.FC = () => {
                 isRadioScanning ? styles.radarLedActive : styles.radarLedIdle,
               ]}
             />
-            <Text style={styles.title}>// OFFLINE RF MESH RADAR //</Text>
+            <Text style={styles.title}>Mesh Discovery & Radar</Text>
           </View>
           <Text style={styles.subtitle}>
             {isRadioScanning
-              ? 'ACTIVE OBSERVATION // BLE GATT RADIOS & WI-FI DIRECT'
-              : 'TRANSCEIVER STANDBY // MANUAL SCAN REQUIRED'}
+              ? 'Continuous observation via BLE 5.2 & Wi-Fi Direct'
+              : 'Transceiver standby · Tap scan to discover peers'}
           </Text>
         </View>
 
@@ -63,19 +63,19 @@ export const MeshScreen: React.FC = () => {
           activeOpacity={0.8}
         >
           <Text style={[styles.scanBtnText, isRadioScanning && styles.scanBtnTextActive]}>
-            {isRadioScanning ? '[HALT SCAN]' : '[RADAR SWEEP]'}
+            {isRadioScanning ? 'Halt Scan' : 'Scan Radar'}
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* TACTICAL TAB SWITCHER */}
+      {/* TAB SWITCHER */}
       <View style={styles.tabSwitcher}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === 'list' && styles.tabButtonActive]}
           onPress={() => setActiveTab('list')}
         >
           <Text style={[styles.tabButtonText, activeTab === 'list' && styles.tabButtonTextActive]}>
-            // 01 NODE LIST ({peers.length}) //
+            Node List ({peers.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -83,7 +83,7 @@ export const MeshScreen: React.FC = () => {
           onPress={() => setActiveTab('topology')}
         >
           <Text style={[styles.tabButtonText, activeTab === 'topology' && styles.tabButtonTextActive]}>
-            // 02 MESH TOPOLOGY //
+            Mesh Topology
           </Text>
         </TouchableOpacity>
       </View>
@@ -102,11 +102,11 @@ export const MeshScreen: React.FC = () => {
                 <View style={styles.peerCardHeader}>
                   <View style={styles.peerInfoWrap}>
                     <View style={styles.nameRow}>
-                      <Text style={styles.peerAlias}>{item.alias.toUpperCase()}</Text>
+                      <Text style={styles.peerAlias}>{item.alias}</Text>
                       <TransportBadge type={item.transportType} style={styles.transportTag} />
                     </View>
                     <Text style={styles.peerIdText}>
-                      ED25519: {item.peerId.slice(0, 16)}...
+                      Ed25519: {item.peerId.slice(0, 16)}...
                     </Text>
                   </View>
 
@@ -118,20 +118,20 @@ export const MeshScreen: React.FC = () => {
                 {/* SAFETY NUMBER FINGERPRINT ROW */}
                 <View style={styles.securityRow}>
                   <View style={styles.fingerprintCol}>
-                    <Text style={styles.safetyLabel}>// SAFETY FINGERPRINT AUTH //</Text>
-                    <Text style={styles.safetyNumber}>{item.safetyNumber || 'UNAUTHENTICATED'}</Text>
+                    <Text style={styles.safetyLabel}>Safety Fingerprint Authentication</Text>
+                    <Text style={styles.safetyNumber}>{item.safetyNumber || 'Unauthenticated'}</Text>
                   </View>
                   <TrustBadge status={item.trustStatus} />
                 </View>
 
-                {/* TACTICAL TRUST ACTIONS */}
+                {/* TRUST ACTIONS */}
                 <View style={styles.actionRow}>
                   <TouchableOpacity
                     style={styles.verifyBtn}
                     onPress={() => handleVerifyPrompt(item)}
                   >
                     <Text style={styles.verifyBtnText}>
-                      {isTrusted ? '[INSPECT AUTH]' : '[VERIFY SAFETY NUMBER]'}
+                      {isTrusted ? 'Inspect Auth' : 'Verify Safety Number'}
                     </Text>
                   </TouchableOpacity>
 
@@ -140,14 +140,14 @@ export const MeshScreen: React.FC = () => {
                       style={styles.revokeBtn}
                       onPress={() => updatePeerTrust(item.peerId, TrustStatus.DISCOVERED)}
                     >
-                      <Text style={styles.revokeBtnText}>[REVOKE TRUST]</Text>
+                      <Text style={styles.revokeBtnText}>Revoke Trust</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
                       style={styles.trustDirectBtn}
                       onPress={() => updatePeerTrust(item.peerId, TrustStatus.TRUSTED)}
                     >
-                      <Text style={styles.trustDirectText}>[AUTHORIZE NODE]</Text>
+                      <Text style={styles.trustDirectText}>Authorize Node</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -158,7 +158,7 @@ export const MeshScreen: React.FC = () => {
       ) : (
         /* MESH TOPOLOGY VISUALIZER */
         <View style={styles.topologyContainer}>
-          <Text style={styles.topologyTitle}>// ESTABLISHED PEER-TO-PEER MESH TOPOLOGY //</Text>
+          <Text style={styles.topologyTitle}>Established P2P Mesh Topology</Text>
           <Text style={styles.topologySubtitle}>
             Represents authenticated link states. Solid lines depict active multi-hop store-and-forward routes.
           </Text>
@@ -166,9 +166,9 @@ export const MeshScreen: React.FC = () => {
           <View style={styles.topologyCanvas}>
             {/* ORIGIN / LOCAL NODE */}
             <View style={styles.localNode}>
-              <Text style={styles.nodeIcon}>⬢</Text>
-              <Text style={styles.nodeAlias}>LOCAL [YOU]</Text>
-              <Text style={styles.nodeMeta}>ORIGIN TRANSCEIVER</Text>
+              <Text style={styles.nodeIcon}>●</Text>
+              <Text style={styles.nodeAlias}>Local Node [You]</Text>
+              <Text style={styles.nodeMeta}>Origin Transceiver</Text>
             </View>
 
             <View style={styles.topologyLine} />
@@ -185,8 +185,8 @@ export const MeshScreen: React.FC = () => {
                   >
                     <Text style={styles.nodeIcon}>📡</Text>
                   </View>
-                  <Text style={styles.peerNodeAlias}>{peer.alias.toUpperCase()}</Text>
-                  <Text style={styles.peerNodeHops}>DIRECT BLE LINK</Text>
+                  <Text style={styles.peerNodeAlias}>{peer.alias}</Text>
+                  <Text style={styles.peerNodeHops}>Direct BLE Link</Text>
                   <Text
                     style={[
                       styles.peerNodeTrust,
@@ -198,7 +198,7 @@ export const MeshScreen: React.FC = () => {
                       },
                     ]}
                   >
-                    [{peer.trustStatus}]
+                    {peer.trustStatus}
                   </Text>
                 </View>
               ))}
@@ -207,7 +207,7 @@ export const MeshScreen: React.FC = () => {
 
           {/* TOPOLOGY METRICS FOOTER */}
           <View style={styles.topologyLegend}>
-            <Text style={styles.legendTitle}>// MESH ROUTING PROTOCOL STATS //</Text>
+            <Text style={styles.legendTitle}>Mesh Routing Protocol Stats</Text>
             <Text style={styles.legendBody}>
               • Multi-hop TTL limit: 7 hops · Store-and-forward DTN cache buffer: 50 messages
             </Text>
@@ -280,7 +280,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: NomadSpacing.md,
+    paddingHorizontal: NomadSpacing.md,
+    paddingVertical: NomadSpacing.sm + 2,
     backgroundColor: DarkThemeColors.surface,
     borderBottomWidth: 1,
     borderBottomColor: DarkThemeColors.border,
@@ -288,12 +289,12 @@ const styles = StyleSheet.create({
   headerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   radarLed: {
-    width: 6,
-    height: 6,
-    borderRadius: 1,
+    width: 7,
+    height: 7,
+    borderRadius: NomadRadius.full,
   },
   radarLedActive: {
     backgroundColor: DarkThemeColors.tacticalGreen,
@@ -306,18 +307,19 @@ const styles = StyleSheet.create({
     color: DarkThemeColors.primaryText,
     letterSpacing: 1.2,
     fontWeight: '800',
+    fontSize: 12,
   },
   subtitle: {
     ...NomadTypography.monoSmall,
     color: DarkThemeColors.secondaryText,
-    fontSize: 9,
-    marginTop: 3,
+    fontSize: 9.5,
+    marginTop: 2,
     maxWidth: 240,
   },
   scanBtn: {
-    paddingHorizontal: NomadSpacing.sm + 2,
-    paddingVertical: NomadSpacing.xs + 2,
-    borderRadius: NomadRadius.xs,
+    paddingHorizontal: NomadSpacing.md,
+    paddingVertical: NomadSpacing.xs + 3,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -328,12 +330,12 @@ const styles = StyleSheet.create({
   },
   scanBtnInactive: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
-    borderColor: DarkThemeColors.tacticalCyan,
+    borderColor: DarkThemeColors.accent,
   },
   scanBtnText: {
     ...NomadTypography.monoSmall,
     fontSize: 10,
-    color: DarkThemeColors.tacticalCyan,
+    color: DarkThemeColors.accent,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
@@ -342,46 +344,47 @@ const styles = StyleSheet.create({
   },
   tabSwitcher: {
     flexDirection: 'row',
-    backgroundColor: DarkThemeColors.surfaceSubtle,
+    backgroundColor: '#0A0A0C',
     padding: 3,
-    margin: NomadSpacing.sm,
-    borderRadius: NomadRadius.xs,
+    marginHorizontal: NomadSpacing.md,
+    marginVertical: NomadSpacing.sm,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
     gap: 4,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: NomadSpacing.xs + 2,
+    paddingVertical: NomadSpacing.xs + 3,
     alignItems: 'center',
-    borderRadius: NomadRadius.xs,
+    borderRadius: NomadRadius.full,
   },
   tabButtonActive: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
-    borderColor: DarkThemeColors.tacticalCyan,
+    borderColor: DarkThemeColors.borderLight,
   },
   tabButtonText: {
     ...NomadTypography.monoSmall,
-    fontSize: 10,
-    color: DarkThemeColors.secondaryText,
+    fontSize: 10.5,
+    color: DarkThemeColors.mutedText,
     fontWeight: '700',
   },
   tabButtonTextActive: {
-    color: DarkThemeColors.tacticalCyan,
+    color: DarkThemeColors.primaryText,
     fontWeight: '800',
   },
   listContent: {
-    paddingHorizontal: NomadSpacing.sm,
+    paddingHorizontal: NomadSpacing.md,
     paddingBottom: NomadSpacing.xl,
   },
   peerCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.xs,
-    padding: NomadSpacing.sm + 2,
-    marginBottom: NomadSpacing.xs + 3,
+    borderRadius: NomadRadius.lg,
+    padding: NomadSpacing.md,
+    marginBottom: NomadSpacing.sm,
   },
   peerCardHeader: {
     flexDirection: 'row',
@@ -399,6 +402,7 @@ const styles = StyleSheet.create({
     ...NomadTypography.bodyMedium,
     color: DarkThemeColors.primaryText,
     marginRight: NomadSpacing.sm,
+    fontWeight: '700',
   },
   transportTag: {
     marginRight: NomadSpacing.xs,
@@ -414,13 +418,14 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surfaceSubtle,
     paddingHorizontal: NomadSpacing.sm,
     paddingVertical: 4,
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
     borderColor: DarkThemeColors.borderSubtle,
   },
   rssiValue: {
     ...NomadTypography.metadata,
     fontWeight: '700',
+    color: DarkThemeColors.accent,
   },
   rssiLabel: {
     ...NomadTypography.metadata,
@@ -444,15 +449,16 @@ const styles = StyleSheet.create({
   safetyLabel: {
     ...NomadTypography.metadata,
     color: DarkThemeColors.mutedText,
-    fontSize: 10,
+    fontSize: 9.5,
     letterSpacing: 0.8,
   },
   safetyNumber: {
     ...NomadTypography.mono,
-    color: DarkThemeColors.actionBlue,
-    fontSize: 14,
+    color: DarkThemeColors.primaryText,
+    fontSize: 13,
     fontWeight: '700',
     marginTop: 2,
+    letterSpacing: 1,
   },
   actionRow: {
     flexDirection: 'row',
@@ -465,27 +471,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
     paddingVertical: NomadSpacing.sm,
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.full,
     alignItems: 'center',
   },
   verifyBtnText: {
     ...NomadTypography.button,
-    fontSize: 12,
+    fontSize: 11,
     color: DarkThemeColors.primaryText,
+    fontWeight: '700',
   },
   trustDirectBtn: {
-    backgroundColor: DarkThemeColors.actionBlueSubtle,
+    backgroundColor: DarkThemeColors.accentSubtle,
     borderWidth: 1,
-    borderColor: DarkThemeColors.actionBlue,
+    borderColor: DarkThemeColors.accent,
     paddingHorizontal: NomadSpacing.md,
     paddingVertical: NomadSpacing.sm,
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.full,
     alignItems: 'center',
   },
   trustDirectText: {
     ...NomadTypography.button,
-    fontSize: 12,
-    color: DarkThemeColors.actionBlue,
+    fontSize: 11,
+    color: DarkThemeColors.accent,
+    fontWeight: '700',
   },
   revokeBtn: {
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
@@ -493,13 +501,14 @@ const styles = StyleSheet.create({
     borderColor: DarkThemeColors.emergencyRed,
     paddingHorizontal: NomadSpacing.md,
     paddingVertical: NomadSpacing.sm,
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.full,
     alignItems: 'center',
   },
   revokeBtnText: {
     ...NomadTypography.button,
-    fontSize: 12,
+    fontSize: 11,
     color: DarkThemeColors.emergencyRed,
+    fontWeight: '700',
   },
   topologyContainer: {
     flex: 1,
@@ -521,36 +530,37 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.lg,
     padding: NomadSpacing.lg,
     alignItems: 'center',
   },
   localNode: {
     alignItems: 'center',
-    backgroundColor: DarkThemeColors.brandNavy,
-    borderWidth: 2,
-    borderColor: DarkThemeColors.actionBlue,
-    borderRadius: NomadRadius.md,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.accent,
+    borderRadius: NomadRadius.full,
     paddingHorizontal: NomadSpacing.lg,
     paddingVertical: NomadSpacing.sm,
   },
   nodeIcon: {
-    fontSize: 20,
-    color: '#FFFFFF',
+    fontSize: 18,
+    color: DarkThemeColors.accent,
   },
   nodeAlias: {
     ...NomadTypography.bodyMedium,
-    color: '#FFFFFF',
+    color: DarkThemeColors.primaryText,
+    fontWeight: '700',
   },
   nodeMeta: {
     ...NomadTypography.metadata,
-    color: DarkThemeColors.actionBlue,
+    color: DarkThemeColors.accent,
     fontSize: 10,
   },
   topologyLine: {
-    width: 2,
+    width: 1,
     height: 32,
-    backgroundColor: DarkThemeColors.actionBlue,
+    backgroundColor: DarkThemeColors.borderLight,
     marginVertical: NomadSpacing.xs,
   },
   nodesGrid: {
@@ -572,7 +582,7 @@ const styles = StyleSheet.create({
   nodeCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: NomadRadius.full,
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
@@ -581,7 +591,7 @@ const styles = StyleSheet.create({
     marginBottom: NomadSpacing.xs,
   },
   nodeCircleTrusted: {
-    borderColor: DarkThemeColors.successGreen,
+    borderColor: DarkThemeColors.tacticalGreen,
   },
   peerNodeAlias: {
     ...NomadTypography.supportingMedium,
@@ -603,11 +613,11 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.xs,
+    borderRadius: NomadRadius.lg,
   },
   legendTitle: {
     ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalCyan,
+    color: DarkThemeColors.accent,
     fontSize: 9.5,
     fontWeight: '800',
     letterSpacing: 0.8,
@@ -637,7 +647,7 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.xl,
     padding: NomadSpacing.lg,
   },
   modalTitle: {
@@ -656,7 +666,7 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.lg,
     padding: NomadSpacing.md,
     alignItems: 'center',
     marginBottom: NomadSpacing.md,
@@ -669,7 +679,7 @@ const styles = StyleSheet.create({
   fingerprintLarge: {
     ...NomadTypography.mono,
     fontSize: 20,
-    color: DarkThemeColors.actionBlue,
+    color: DarkThemeColors.primaryText,
     letterSpacing: 2,
     fontWeight: '700',
     marginVertical: NomadSpacing.xs,
@@ -684,19 +694,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
     borderStyle: 'dashed',
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.lg,
     padding: NomadSpacing.lg,
     alignItems: 'center',
     marginBottom: NomadSpacing.lg,
   },
   qrIcon: {
-    fontSize: 48,
-    color: DarkThemeColors.actionBlue,
+    fontSize: 44,
+    color: DarkThemeColors.accent,
     marginBottom: NomadSpacing.xs,
   },
   qrText: {
     ...NomadTypography.button,
-    fontSize: 13,
+    fontSize: 12,
     color: DarkThemeColors.primaryText,
   },
   qrSub: {

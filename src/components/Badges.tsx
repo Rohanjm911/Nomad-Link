@@ -7,44 +7,45 @@ export const TrustBadge: React.FC<{ status: TrustStatus; style?: ViewStyle }> = 
   let bgColor = DarkThemeColors.surfaceSubtle;
   let borderColor = DarkThemeColors.border;
   let textColor = DarkThemeColors.secondaryText;
-  let label = 'UNKNOWN';
-  let icon = '○';
+  let dotColor = DarkThemeColors.mutedText;
+  let label = 'Unknown';
 
   switch (status) {
     case TrustStatus.TRUSTED:
       bgColor = DarkThemeColors.successGreenSubtle;
       borderColor = DarkThemeColors.tacticalGreen;
       textColor = DarkThemeColors.tacticalGreen;
-      label = 'VERIFIED';
-      icon = '✓';
+      dotColor = DarkThemeColors.tacticalGreen;
+      label = 'Verified';
       break;
     case TrustStatus.VERIFICATION_PENDING:
       bgColor = DarkThemeColors.warningAmberSubtle;
       borderColor = DarkThemeColors.tacticalAmber;
       textColor = DarkThemeColors.tacticalAmber;
-      label = 'PENDING AUTH';
-      icon = '▲';
+      dotColor = DarkThemeColors.tacticalAmber;
+      label = 'Pending Auth';
       break;
     case TrustStatus.DISCOVERED:
       bgColor = DarkThemeColors.surfaceSubtle;
       borderColor = DarkThemeColors.border;
       textColor = DarkThemeColors.secondaryText;
-      label = 'DISCOVERED';
-      icon = '◎';
+      dotColor = DarkThemeColors.secondaryText;
+      label = 'Discovered';
       break;
     case TrustStatus.BLOCKED:
       bgColor = DarkThemeColors.emergencyRedSubtle;
       borderColor = DarkThemeColors.emergencyRed;
       textColor = DarkThemeColors.emergencyRed;
-      label = 'BLOCKED';
-      icon = '✕';
+      dotColor = DarkThemeColors.emergencyRed;
+      label = 'Blocked';
       break;
   }
 
   return (
     <View style={[styles.tacticalBadgeBase, { backgroundColor: bgColor, borderColor }, style]}>
+      <View style={[styles.badgeDot, { backgroundColor: dotColor }]} />
       <Text style={[styles.tacticalBadgeText, { color: textColor }]}>
-        [{icon} {label}]
+        {label}
       </Text>
     </View>
   );
@@ -55,39 +56,39 @@ export const DeliveryStatusIndicator: React.FC<{
   hopCount?: number;
   style?: ViewStyle;
 }> = ({ state, hopCount = 0, style }) => {
-  let label = 'PROCESSING';
+  let label = 'Processing';
   let color = DarkThemeColors.mutedText;
 
   switch (state) {
     case DeliveryState.QUEUED_LOCALLY:
-      label = 'DTN QUEUED';
+      label = 'DTN Queued';
       color = DarkThemeColors.tacticalAmber;
       break;
     case DeliveryState.FORWARDED_TO_RELAY:
-      label = hopCount > 0 ? `RELAY (HOP ${hopCount})` : 'MESH RELAY';
+      label = hopCount > 0 ? `Relay (Hop ${hopCount})` : 'Relay';
       color = DarkThemeColors.tacticalCyan;
       break;
     case DeliveryState.DELIVERED_TO_DESTINATION:
-      label = 'DELIVERED';
+      label = 'Delivered';
       color = DarkThemeColors.tacticalGreen;
       break;
     case DeliveryState.READ_BY_RECIPIENT:
-      label = 'ACK READ';
+      label = 'Read';
       color = DarkThemeColors.tacticalCyan;
       break;
     case DeliveryState.FAILED:
-      label = 'TX FAILED';
+      label = 'Failed';
       color = DarkThemeColors.emergencyRed;
       break;
     default:
-      label = 'ACCEPTED';
+      label = 'Sent';
       color = DarkThemeColors.mutedText;
   }
 
   return (
     <View style={[styles.deliveryRow, style]}>
       <View style={[styles.tacticalLed, { backgroundColor: color }]} />
-      <Text style={[styles.deliveryText, { color }]}>[{label}]</Text>
+      <Text style={[styles.deliveryText, { color }]}>{label}</Text>
     </View>
   );
 };
@@ -95,7 +96,7 @@ export const DeliveryStatusIndicator: React.FC<{
 export const TransportBadge: React.FC<{ type: TransportType; style?: ViewStyle }> = ({ type, style }) => {
   return (
     <View style={[styles.transportBadge, style]}>
-      <Text style={styles.transportText}>[{type}]</Text>
+      <Text style={styles.transportText}>{type}</Text>
     </View>
   );
 };
@@ -104,7 +105,7 @@ export const SignalMeter: React.FC<{ rssi?: number; style?: ViewStyle }> = ({ rs
   if (rssi === undefined || rssi === null) {
     return (
       <View style={[styles.signalRow, style]}>
-        <Text style={styles.signalMonoText}>[DIRECT / P2P]</Text>
+        <Text style={styles.signalMonoText}>Direct P2P</Text>
       </View>
     );
   }
@@ -159,7 +160,8 @@ export const TacticalStatusPill: React.FC<{
 
   return (
     <View style={[styles.tacticalPill, { backgroundColor: bg, borderColor: color }, style]}>
-      <Text style={[styles.tacticalPillText, { color }]}>[{label}]</Text>
+      <View style={[styles.badgeDot, { backgroundColor: color }]} />
+      <Text style={[styles.tacticalPillText, { color }]}>{label}</Text>
     </View>
   );
 };
@@ -178,7 +180,7 @@ export const NetworkStatusBanner: React.FC<{
     <View style={[styles.bannerContainer, { borderColor }, style]}>
       <View style={styles.bannerRow}>
         <View style={[styles.bannerDot, { backgroundColor: dotColor }]} />
-        <Text style={styles.bannerTitle}>// {title.toUpperCase()} //</Text>
+        <Text style={styles.bannerTitle}>{title}</Text>
       </View>
       <Text style={styles.bannerSubtitle}>{subtitle}</Text>
     </View>
@@ -187,45 +189,53 @@ export const NetworkStatusBanner: React.FC<{
 
 const styles = StyleSheet.create({
   tacticalBadgeBase: {
-    paddingHorizontal: NomadSpacing.xs + 2,
-    paddingVertical: NomadSpacing.xxs,
-    borderRadius: NomadRadius.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: NomadSpacing.sm,
+    paddingVertical: 3,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
     alignSelf: 'flex-start',
+    gap: 5,
+  },
+  badgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   tacticalBadgeText: {
-    ...NomadTypography.monoSmall,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    ...NomadTypography.metadata,
+    fontSize: 10,
+    fontWeight: '600',
   },
   deliveryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
   },
   tacticalLed: {
     width: 6,
     height: 6,
-    borderRadius: 1,
+    borderRadius: 3,
   },
   deliveryText: {
     ...NomadTypography.monoSmall,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   transportBadge: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: DarkThemeColors.borderSubtle,
-    borderRadius: NomadRadius.xs,
-    paddingHorizontal: NomadSpacing.xs,
-    paddingVertical: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.full,
+    paddingHorizontal: NomadSpacing.sm,
+    paddingVertical: 2,
     alignSelf: 'flex-start',
   },
   transportText: {
     ...NomadTypography.monoSmall,
-    color: DarkThemeColors.tacticalCyan,
+    color: DarkThemeColors.secondaryText,
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   signalRow: {
     flexDirection: 'row',
@@ -240,7 +250,7 @@ const styles = StyleSheet.create({
   },
   signalBar: {
     width: 3,
-    borderRadius: 1,
+    borderRadius: 1.5,
   },
   barOff: {
     backgroundColor: DarkThemeColors.borderSubtle,
@@ -248,24 +258,27 @@ const styles = StyleSheet.create({
   signalMonoText: {
     ...NomadTypography.monoSmall,
     color: DarkThemeColors.secondaryText,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   tacticalPill: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: NomadRadius.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: NomadSpacing.sm,
+    paddingVertical: 3,
+    borderRadius: NomadRadius.full,
     borderWidth: 1,
     alignSelf: 'flex-start',
+    gap: 5,
   },
   tacticalPillText: {
-    ...NomadTypography.monoSmall,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+    ...NomadTypography.metadata,
+    fontSize: 10,
+    fontWeight: '600',
   },
   bannerContainer: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.md,
     padding: NomadSpacing.md,
   },
   bannerRow: {
@@ -276,14 +289,14 @@ const styles = StyleSheet.create({
   bannerDot: {
     width: 6,
     height: 6,
-    borderRadius: 1,
+    borderRadius: 3,
     marginRight: NomadSpacing.sm,
   },
   bannerTitle: {
-    ...NomadTypography.monoSmall,
+    ...NomadTypography.sectionHeading,
+    fontSize: 13,
     color: DarkThemeColors.primaryText,
-    fontWeight: '700',
-    letterSpacing: 1,
+    fontWeight: '600',
   },
   bannerSubtitle: {
     ...NomadTypography.supporting,
