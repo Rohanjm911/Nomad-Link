@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android build outputs & caches
+.gradle/
+.gradle_user_home/
+build/
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+
+# APK / Bundle binaries (>100MB GitHub push limit - distribute via GitHub Releases)
+*.apk
+*.aab
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

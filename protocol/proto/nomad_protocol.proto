@@ -1,0 +1,172 @@
+syntax = "proto3";
+
+package nomadlink.protocol;
+
+option java_package = "com.nomadlink.protocol";
+option java_outer_classname = "NomadProtocol";
+
+enum PayloadType {
+  PAYLOAD_UNKNOWN = 0;
+  PAYLOAD_DIRECT_MESSAGE = 1;
+  PAYLOAD_DELIVERY_RECEIPT = 2;
+  PAYLOAD_CONVOY_TELEMETRY = 3;
+  PAYLOAD_CONVOY_SIGNAL = 4;
+  PAYLOAD_GROUP_MESSAGE = 5;
+  PAYLOAD_GROUP_KEY_DISTRIBUTION = 6;
+  PAYLOAD_EMERGENCY_BEACON = 7;
+  PAYLOAD_ROUTING_CONTROL = 8;
+  PAYLOAD_PEER_CAPABILITY = 9;
+}
+
+enum PriorityLevel {
+  PRIORITY_NORMAL = 0;
+  PRIORITY_HIGH = 1;
+  PRIORITY_EMERGENCY = 2;
+}
+
+// Bounded Delay-Tolerant Network (DTN) Message Envelope
+message MessageEnvelope {
+  // Global unique message identifier (SHA256 hex or UUIDv4)
+  string message_id = 1;
+  
+  // Wire protocol version (e.g. 1)
+  uint32 protocol_version = 2;
+  
+  // Public Identity Key of sender (hex-encoded Ed25519)
+  string origin_peer_id = 3;
+  
+  // Target peer ID or Group ID ('*' for emergency broadcasts)
+  string destination_id = 4;
+  
+  // Unix timestamp (ms) when created
+  int64 created_at = 5;
+  
+  // Unix timestamp (ms) after which relays must drop this envelope
+  int64 expires_at = 6;
+  
+  // Remaining allowable hops (decremented on each forwarding relay)
+  uint32 hop_limit = 7;
+  
+  // Total hops traversed so far
+  uint32 hop_count = 8;
+  
+  // Type of the inner payload
+  PayloadType payload_type = 9;
+  
+  // Priority for store-and-forward scheduling queues
+  PriorityLevel priority = 10;
+  
+  // Encrypted ciphertext bytes (or plaintext for public emergency beacons)
+  bytes encrypted_payload = 11;
+  
+  // Ephemeral public key for X25519 ECDH (if E2EE encrypted)
+  bytes ephemeral_pubkey = 12;
+  
+  // Initialization vector / Nonce for AES-GCM or ChaCha20-Poly1305
+  bytes nonce = 13;
+  
+  // Digital signature of envelope header & payload by origin Ed25519 key
+  bytes sender_signature = 14;
+}
+
+// End-to-End Encrypted Direct Text Message
+message DirectMessagePayload {
+  string message_id = 1;
+  string conversation_id = 2;
+  string text = 3;
+  int64 timestamp = 4;
+  bool request_delivery_receipt = 5;
+  bool request_read_receipt = 6;
+}
+
+// Application-Level Delivery Receipt
+message DeliveryReceiptPayload {
+  string original_message_id = 1;
+  string recipient_peer_id = 2;
+  enum ReceiptStatus {
+    STATUS_UNKNOWN = 0;
+    STATUS_RELAYED = 1;
+    STATUS_DELIVERED = 2;
+    STATUS_READ = 3;
+  }
+  ReceiptStatus status = 3;
+  int64 timestamp = 4;
+  bytes recipient_signature = 5;
+}
+
+// Convoy Real-Time Telemetry Payload
+message ConvoyTelemetryPayload {
+  string convoy_id = 1;
+  string member_id = 2;
+  string display_name = 3;
+  
+  // Geolocation
+  double latitude = 4;
+  double longitude = 5;
+  double altitude_meters = 6;
+  float speed_mps = 7;
+  float heading_degrees = 8;
+  float accuracy_meters = 9;
+  
+  // Dead reckoning flag
+  bool is_dead_reckoning = 10;
+  float confidence_score = 11; // 0.0 to 1.0 (degrades with GPS loss)
+  
+  int64 timestamp = 12;
+  
+  enum ConvoyStatus {
+    STATUS_MOVING = 0;
+    STATUS_STOPPED = 1;
+    STATUS_REGROUPING = 2;
+    STATUS_ASSISTANCE_REQUESTED = 3;
+    STATUS_OFFLINE = 4;
+  }
+  ConvoyStatus status = 13;
+}
+
+// Convoy Regroup / Tactical Signal
+message ConvoySignalPayload {
+  string convoy_id = 1;
+  string sender_id = 2;
+  enum SignalType {
+    SIGNAL_REGROUP = 0;
+    SIGNAL_STOP = 1;
+    SIGNAL_HAZARD_AHEAD = 2;
+    SIGNAL_RADIO_CHECK = 3;
+    SIGNAL_CUSTOM_ALERT = 4;
+  }
+  SignalType signal_type = 3;
+  string note = 4;
+  double target_latitude = 5;
+  double target_longitude = 6;
+  int64 timestamp = 7;
+}
+
+// Tactical Emergency SOS Beacon (Broadcast to all nearby mesh devices)
+message EmergencyBeaconPayload {
+  string beacon_id = 1;
+  string sender_peer_id = 2;
+  string sender_alias = 3;
+  
+  enum Severity {
+    SEVERITY_MEDEVAC = 0;
+    SEVERITY_SEARCH_AND_RESCUE = 1;
+    SEVERITY_MECHANICAL_BREAKDOWN = 2;
+    SEVERITY_SEVERE_WEATHER = 3;
+    SEVERITY_GENERAL_DISTRESS = 4;
+  }
+  Severity severity = 4;
+  
+  string nature_of_emergency = 5;
+  int32 personnel_count = 6;
+  
+  // Location details
+  double latitude = 7;
+  double longitude = 8;
+  double altitude_meters = 9;
+  float accuracy_meters = 10;
+  int64 location_timestamp = 11;
+  
+  int64 emergency_timestamp = 12;
+  bool is_active = 13; // Set to false if cancelled
+}

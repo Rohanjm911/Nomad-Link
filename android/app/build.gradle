@@ -1,0 +1,76 @@
+// CRITICAL: Apply the React Native Gradle plugin for JS bundle wiring
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.facebook.react'
+
+/**
+ * React Native configuration block (RN 0.76+).
+ * Controls JS bundle build, Hermes, and codegen.
+ */
+react {
+    // Use Hermes JS engine (required for RN 0.76 — Old JSC engine removed)
+    hermesEnabled = true
+    // The root of the repo (needed to locate node_modules)
+    root = file("../../")
+    // The entry file for the JS bundle
+    entryFile = file("../../index.js")
+}
+
+android {
+    namespace 'com.nomadlink'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.nomadlink"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // NOTE: Remove applicationIdSuffix to avoid mismatch with
+            // the metro bundler's expected app ID during development
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+
+    // Security & Keystore
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+
+    // Coroutines & Lifecycle
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.2'
+
+    // React Native core - the plugin manages the exact version automatically
+    // via react-native-gradle-plugin so we do NOT hardcode the version here.
+    // This prevents version mismatch crashes.
+    implementation "com.facebook.react:react-android"
+    implementation "com.facebook.react:hermes-android"
+
+    // Unit Testing
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1'
+}

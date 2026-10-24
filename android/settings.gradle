@@ -1,0 +1,26 @@
+pluginManagement {
+    includeBuild("../node_modules/@react-native/gradle-plugin")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+plugins {
+    id("com.facebook.react.settings")
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "NomadLink"
+include ':app'
+includeBuild("../node_modules/@react-native/gradle-plugin")
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromConfigFile(new File(rootDir, "autolinking.json"))
+}

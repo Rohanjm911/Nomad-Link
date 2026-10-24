@@ -1,0 +1,11 @@
+{
+  "reactNativeVersion": "0.76.2",
+  "dependencies": {},
+  "project": {
+    "android": {
+      "sourceDir": "app",
+      "appName": "app",
+      "packageName": "com.nomadlink"
+    }
+  }
+}
