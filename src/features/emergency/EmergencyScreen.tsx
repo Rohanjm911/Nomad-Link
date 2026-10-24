@@ -67,54 +67,60 @@ export const EmergencyScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       
+      {/* TACTICAL SOS HEADER */}
       <View style={styles.alertHeader}>
-        <Text style={styles.alertIcon}>🚨</Text>
+        <View style={styles.alertIconWrap}>
+          <Text style={styles.alertIcon}>🚨</Text>
+        </View>
         <View style={styles.alertTextWrap}>
-          <Text style={styles.alertTitle}>TACTICAL OFFLINE SOS BEACON</Text>
+          <View style={styles.alertTitleRow}>
+            <View style={styles.alertLed} />
+            <Text style={styles.alertTitle}>// TACTICAL OFFLINE SOS BEACON //</Text>
+          </View>
           <Text style={styles.alertSubtitle}>
-            Transmits distress telemetry to nearby mesh nodes. Does NOT directly call police, cellular 911/112, or satellite rescue.
+            Transmits high-priority distress telemetry envelope to all nodes in transceiver horizon. All mesh relays prioritize forwarding this envelope. Does NOT call civilian 911/112 or satellite search-and-rescue.
           </Text>
         </View>
       </View>
 
-      
+      {/* ACTIVE BROADCAST CARD */}
       {sosDispatched && (
         <View style={styles.dispatchedCard}>
           <View style={styles.dispatchedRow}>
             <View style={styles.pulsingDot} />
-            <Text style={styles.dispatchedTitle}>ACTIVE DISTRESS BEACON BROADCASTING</Text>
+            <Text style={styles.dispatchedTitle}>// ACTIVE BEACON BROADCASTING //</Text>
           </View>
           <Text style={styles.dispatchedBody}>
-            Beacon ID: SOS-{Date.now().toString(16).slice(-6)} · Priority: Highest (0x03) · Hop TTL: 7
+            BEACON ID: SOS-{Date.now().toString(16).slice(-6).toUpperCase()} · PRIORITY: HIGHEST (0x03) · TTL: 7 HOPS
           </Text>
           <Text style={styles.deliveryStatusNote}>
-            Status: Stored in local DTN router & repeating advertising burst every 8 seconds.
+            STATUS: Stored in local DTN router. Burst advertisement repeats every 8 seconds over BLE & Wi-Fi Direct.
           </Text>
-          <TouchableOpacity style={styles.standDownBtn} onPress={handleCancelSos}>
-            <Text style={styles.standDownText}>Cancel Distress Beacon</Text>
+          <TouchableOpacity style={styles.standDownBtn} onPress={handleCancelSos} activeOpacity={0.7}>
+            <Text style={styles.standDownText}>[HALT DISTRESS BEACON / STAND DOWN]</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      
-      <SectionHeader title="Attached Position Telemetry" />
+      {/* ATTACHED TELEMETRY */}
+      <SectionHeader title="Attached Position Telemetry (GNSS / INS)" />
       <View style={styles.geoCard}>
         <View style={styles.geoRow}>
           <View>
             <Text style={styles.coords}>
-              {deadReckoning.latitude.toFixed(6)}° N, {deadReckoning.longitude.toFixed(6)}° E
+              {deadReckoning.latitude.toFixed(6)}° N · {deadReckoning.longitude.toFixed(6)}° E
             </Text>
             <Text style={styles.geoMeta}>
-              Fix: {deadReckoning.isGpsActive ? 'GNSS Lock' : 'Dead Reckoning Estimate'} · Uncertainty: ±{deadReckoning.uncertaintyRadiusMeters}m
+              FIX: {deadReckoning.isGpsActive ? '[GNSS 3D LOCK]' : '[INERTIAL DEAD RECKONING]'} · ERR: ±{deadReckoning.uncertaintyRadiusMeters}M
             </Text>
           </View>
           <View style={styles.altBadge}>
-            <Text style={styles.altText}>Alt: 4,350m</Text>
+            <Text style={styles.altText}>ALT: 4,350M</Text>
           </View>
         </View>
       </View>
 
-      
+      {/* EMERGENCY CATEGORY GRID */}
       <SectionHeader title="Select Emergency Category" />
       <View style={styles.severityGrid}>
         <TouchableOpacity
@@ -126,9 +132,10 @@ export const EmergencyScreen: React.FC = () => {
             setSelectedSeverity(EmergencySeverity.SEVERITY_MEDEVAC);
             setNote('Medical assistance needed. Immediate evacuation required.');
           }}
+          activeOpacity={0.7}
         >
           <Text style={styles.severityIcon}>🩺</Text>
-          <Text style={styles.severityTitle}>MEDEVAC</Text>
+          <Text style={styles.severityTitle}>[01 MEDEVAC]</Text>
           <Text style={styles.severityDesc}>Severe trauma or injury</Text>
         </TouchableOpacity>
 
@@ -141,9 +148,10 @@ export const EmergencyScreen: React.FC = () => {
             setSelectedSeverity(EmergencySeverity.SEVERITY_SEARCH_AND_RESCUE);
             setNote('Search & Rescue needed. Expedition personnel separated from trail.');
           }}
+          activeOpacity={0.7}
         >
           <Text style={styles.severityIcon}>🧭</Text>
-          <Text style={styles.severityTitle}>LOST / SAR</Text>
+          <Text style={styles.severityTitle}>[02 LOST / SAR]</Text>
           <Text style={styles.severityDesc}>Missing personnel off-route</Text>
         </TouchableOpacity>
 
@@ -156,9 +164,10 @@ export const EmergencyScreen: React.FC = () => {
             setSelectedSeverity(EmergencySeverity.SEVERITY_MECHANICAL_BREAKDOWN);
             setNote('Critical vehicle breakdown. Immobilized in high pass.');
           }}
+          activeOpacity={0.7}
         >
           <Text style={styles.severityIcon}>🔧</Text>
-          <Text style={styles.severityTitle}>BREAKDOWN</Text>
+          <Text style={styles.severityTitle}>[03 BREAKDOWN]</Text>
           <Text style={styles.severityDesc}>Vehicle or gear disabled</Text>
         </TouchableOpacity>
 
@@ -171,29 +180,30 @@ export const EmergencyScreen: React.FC = () => {
             setSelectedSeverity(EmergencySeverity.SEVERITY_GENERAL_DISTRESS);
             setNote('General emergency distress. Hostile weather / terrain hazard.');
           }}
+          activeOpacity={0.7}
         >
           <Text style={styles.severityIcon}>⚠️</Text>
-          <Text style={styles.severityTitle}>GENERAL SOS</Text>
+          <Text style={styles.severityTitle}>[04 GENERAL SOS]</Text>
           <Text style={styles.severityDesc}>Environmental / hazard</Text>
         </TouchableOpacity>
       </View>
 
-      
-      <SectionHeader title="Distress Message Payload" />
+      {/* SITUATION REPORT PAYLOAD */}
+      <SectionHeader title="Distress Situation Report (SITREP)" />
       <TextInput
         style={styles.textInput}
         value={note}
         onChangeText={setNote}
         multiline
         numberOfLines={3}
-        placeholder="Specific condition, injuries, vehicle status..."
+        placeholder="// SPECIFIC INJURIES, VEHICLE STATE, HAZARDS //"
         placeholderTextColor={DarkThemeColors.mutedText}
       />
 
-      
+      {/* MASSIVE DISTRESS TRANSMIT ACTION */}
       <View style={styles.actionWrap}>
         <DangerButton
-          label={isTransmitting ? 'Transmitting...' : 'ACTIVATE DISTRESS BEACON'}
+          label={isTransmitting ? 'TRANSMITTING BEACON...' : 'ACTIVATE DISTRESS BEACON'}
           onPress={handleBroadcastSos}
           loading={isTransmitting}
           icon="🚨"
@@ -218,37 +228,51 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.emergencyRed,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
-    marginBottom: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
+    marginBottom: NomadSpacing.xs + 2,
+  },
+  alertIconWrap: {
+    marginRight: NomadSpacing.sm,
+    marginTop: 2,
   },
   alertIcon: {
-    fontSize: 24,
-    marginRight: NomadSpacing.md,
-    marginTop: 2,
+    fontSize: 20,
   },
   alertTextWrap: {
     flex: 1,
   },
+  alertTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  alertLed: {
+    width: 6,
+    height: 6,
+    backgroundColor: DarkThemeColors.emergencyRed,
+    borderRadius: 1,
+  },
   alertTitle: {
-    ...NomadTypography.supportingMedium,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.emergencyRed,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+    fontWeight: '900',
+    letterSpacing: 1.0,
   },
   alertSubtitle: {
     ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
+    fontSize: 11,
     marginTop: 4,
-    lineHeight: 18,
+    lineHeight: 16,
   },
   dispatchedCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.emergencyRed,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
-    marginBottom: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
+    marginBottom: NomadSpacing.sm,
   },
   dispatchedRow: {
     flexDirection: 'row',
@@ -256,49 +280,53 @@ const styles = StyleSheet.create({
     marginBottom: NomadSpacing.xs,
   },
   pulsingDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 1,
     backgroundColor: DarkThemeColors.emergencyRed,
     marginRight: NomadSpacing.sm,
   },
   dispatchedTitle: {
-    ...NomadTypography.supportingMedium,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.emergencyRed,
-    fontWeight: '800',
+    fontWeight: '900',
+    letterSpacing: 1.0,
   },
   dispatchedBody: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.primaryText,
-    fontFamily: 'monospace',
+    fontSize: 10,
     marginTop: 2,
   },
   deliveryStatusNote: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
+    fontSize: 11,
     marginTop: 4,
   },
   standDownBtn: {
-    marginTop: NomadSpacing.md,
+    marginTop: NomadSpacing.sm,
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    paddingVertical: NomadSpacing.sm,
-    borderRadius: NomadRadius.sm,
+    paddingVertical: NomadSpacing.xs + 2,
+    borderRadius: NomadRadius.xs,
     alignItems: 'center',
   },
   standDownText: {
-    ...NomadTypography.button,
-    fontSize: 12,
-    color: DarkThemeColors.secondaryText,
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.tacticalAmber,
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
   geoCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
-    marginBottom: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
+    marginBottom: NomadSpacing.xs + 2,
   },
   geoRow: {
     flexDirection: 'row',
@@ -307,74 +335,79 @@ const styles = StyleSheet.create({
   },
   coords: {
     ...NomadTypography.mono,
-    fontSize: 14,
-    color: DarkThemeColors.primaryText,
-    fontWeight: '700',
+    fontSize: 12,
+    color: DarkThemeColors.tacticalCyan,
+    fontWeight: '800',
   },
   geoMeta: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.secondaryText,
+    fontSize: 9.5,
     marginTop: 2,
   },
   altBadge: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.borderSubtle,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: NomadRadius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: NomadRadius.xs,
   },
   altText: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.primaryText,
-    fontWeight: '700',
+    fontSize: 9.5,
+    fontWeight: '800',
   },
   severityGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: NomadSpacing.md,
+    gap: 6,
+    marginBottom: NomadSpacing.sm,
   },
   severityBtn: {
-    width: '48%',
+    width: '48.5%',
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm,
   },
   severitySelected: {
     borderColor: DarkThemeColors.emergencyRed,
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
   },
   severityIcon: {
-    fontSize: 22,
-    marginBottom: NomadSpacing.xs,
+    fontSize: 18,
+    marginBottom: 2,
   },
   severityTitle: {
-    ...NomadTypography.bodyMedium,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.primaryText,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   severityDesc: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.supporting,
     color: DarkThemeColors.mutedText,
     fontSize: 10,
     marginTop: 2,
   },
   textInput: {
-    minHeight: 72,
+    minHeight: 64,
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    paddingHorizontal: NomadSpacing.md,
-    paddingVertical: NomadSpacing.sm,
+    borderRadius: NomadRadius.xs,
+    paddingHorizontal: NomadSpacing.sm,
+    paddingVertical: NomadSpacing.xs + 2,
     color: DarkThemeColors.primaryText,
     textAlignVertical: 'top',
-    ...NomadTypography.body,
-    marginBottom: NomadSpacing.lg,
+    ...NomadTypography.monoSmall,
+    fontSize: 11,
+    marginBottom: NomadSpacing.md,
   },
   actionWrap: {
-    marginTop: NomadSpacing.sm,
+    marginTop: NomadSpacing.xs,
   },
 });

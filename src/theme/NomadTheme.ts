@@ -1,7 +1,6 @@
 
 
 export interface ThemeColors {
-  
   primaryBackground: string;
   surface: string;
   surfaceSubtle: string;
@@ -10,13 +9,11 @@ export interface ThemeColors {
   borderSubtle: string;
   borderFocus: string;
 
-  
   primaryText: string;
   secondaryText: string;
   mutedText: string;
   inverseText: string;
 
-  
   brandNavy: string;
   actionBlue: string;
   actionBlueHover: string;
@@ -28,70 +25,93 @@ export interface ThemeColors {
   emergencyRed: string;
   emergencyRedSubtle: string;
 
-  
   rssiStrong: string;
   rssiMedium: string;
   rssiWeak: string;
+
+  // Mil-Spec Tactical Accents
+  tacticalGreen: string;
+  tacticalAmber: string;
+  tacticalCyan: string;
+  tacticalGrid: string;
+  tacticalDark: string;
+  tacticalPanel: string;
 }
 
 export const LightThemeColors: ThemeColors = {
-  primaryBackground: '#F5F7FA',
+  primaryBackground: '#F4F6F8',
   surface: '#FFFFFF',
-  surfaceSubtle: '#EEF2F6',
+  surfaceSubtle: '#EDF2F7',
   surfaceElevated: '#FFFFFF',
-  border: '#D9E1EA',
+  border: '#CFD9E3',
   borderSubtle: '#E2E8F0',
-  borderFocus: '#2563EB',
+  borderFocus: '#00838F',
 
-  primaryText: '#172033',
-  secondaryText: '#64748B',
-  mutedText: '#94A3B8',
+  primaryText: '#0F172A',
+  secondaryText: '#475569',
+  mutedText: '#64748B',
   inverseText: '#FFFFFF',
 
-  brandNavy: '#183B56',
-  actionBlue: '#2563EB',
-  actionBlueHover: '#1D4ED8',
-  actionBlueSubtle: '#EFF6FF',
-  successGreen: '#15803D',
-  successGreenSubtle: '#F0FDF4',
-  warningAmber: '#B45309',
-  warningAmberSubtle: '#FFFBEB',
-  emergencyRed: '#B91C1C',
-  emergencyRedSubtle: '#FEF2F2',
+  brandNavy: '#0F2942',
+  actionBlue: '#00838F',
+  actionBlueHover: '#006064',
+  actionBlueSubtle: '#E0F7FA',
+  successGreen: '#008736',
+  successGreenSubtle: '#E8F5E9',
+  warningAmber: '#D97706',
+  warningAmberSubtle: '#FEF3C7',
+  emergencyRed: '#DC2626',
+  emergencyRedSubtle: '#FEE2E2',
 
-  rssiStrong: '#15803D',
-  rssiMedium: '#B45309',
-  rssiWeak: '#B91C1C',
+  rssiStrong: '#008736',
+  rssiMedium: '#D97706',
+  rssiWeak: '#DC2626',
+
+  tacticalGreen: '#008736',
+  tacticalAmber: '#D97706',
+  tacticalCyan: '#00838F',
+  tacticalGrid: '#E2E8F0',
+  tacticalDark: '#F4F6F8',
+  tacticalPanel: '#FFFFFF',
 };
 
 export const DarkThemeColors: ThemeColors = {
-  primaryBackground: '#101820',
-  surface: '#18232D',
-  surfaceSubtle: '#1F2C38',
-  surfaceElevated: '#243442',
-  border: '#344250',
-  borderSubtle: '#263442',
-  borderFocus: '#3B82F6',
+  // Rugged Matte Black & Gunmetal
+  primaryBackground: '#080C10',
+  surface: '#0F1620',
+  surfaceSubtle: '#151F2C',
+  surfaceElevated: '#1B2737',
+  border: '#233446',
+  borderSubtle: '#182432',
+  borderFocus: '#00E5FF',
 
-  primaryText: '#F1F5F9',
-  secondaryText: '#A7B4C2',
-  mutedText: '#6B7C8E',
-  inverseText: '#101820',
+  // High Contrast Text
+  primaryText: '#E6EDF3',
+  secondaryText: '#8B9EB0',
+  mutedText: '#5A6C7E',
+  inverseText: '#080C10',
 
-  brandNavy: '#1E3A5F',
-  actionBlue: '#3B82F6',
-  actionBlueHover: '#2563EB',
-  actionBlueSubtle: '#1E293B',
-  successGreen: '#22C55E',
-  successGreenSubtle: '#142E1F',
-  warningAmber: '#F59E0B',
-  warningAmberSubtle: '#2D2311',
-  emergencyRed: '#EF4444',
-  emergencyRedSubtle: '#381617',
+  brandNavy: '#102235',
+  actionBlue: '#00E5FF',
+  actionBlueHover: '#00B4D8',
+  actionBlueSubtle: '#092535',
+  successGreen: '#00FF66',
+  successGreenSubtle: '#062916',
+  warningAmber: '#FFB000',
+  warningAmberSubtle: '#2E2004',
+  emergencyRed: '#FF2A2A',
+  emergencyRedSubtle: '#380909',
 
-  rssiStrong: '#22C55E',
-  rssiMedium: '#F59E0B',
-  rssiWeak: '#EF4444',
+  rssiStrong: '#00FF66',
+  rssiMedium: '#FFB000',
+  rssiWeak: '#FF2A2A',
+
+  tacticalGreen: '#00FF66',
+  tacticalAmber: '#FFB000',
+  tacticalCyan: '#00E5FF',
+  tacticalGrid: '#182535',
+  tacticalDark: '#080C10',
+  tacticalPanel: '#0F1620',
 };
 
 export const NomadSpacing = {
@@ -100,82 +120,101 @@ export const NomadSpacing = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 24,
-  xxl: 32,
+  xl: 20,
+  xxl: 28,
 };
 
 export const NomadRadius = {
   none: 0,
+  xs: 2,
   sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  md: 6,
+  lg: 8,
+  xl: 12,
   full: 9999,
 };
 
 export const NomadTypography = {
   display: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '700' as const,
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: '800' as const,
+    letterSpacing: 1.5,
   },
   screenHeading: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '700' as const,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '800' as const,
+    letterSpacing: 1.2,
   },
   sectionHeading: {
-    fontSize: 18,
-    lineHeight: 24,
-    fontWeight: '600' as const,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '700' as const,
+    letterSpacing: 1.0,
   },
   body: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: '400' as const,
   },
   bodyMedium: {
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: '600' as const,
-  },
-  supporting: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '400' as const,
-  },
-  supportingMedium: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600' as const,
-  },
-  metadata: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '500' as const,
-  },
-  button: {
-    fontSize: 15,
+    fontSize: 14,
     lineHeight: 20,
     fontWeight: '600' as const,
   },
-  mono: {
+  supporting: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '400' as const,
+  },
+  supportingMedium: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600' as const,
+  },
+  metadata: {
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '600' as const,
+    letterSpacing: 0.8,
+  },
+  button: {
     fontSize: 13,
     lineHeight: 18,
+    fontWeight: '700' as const,
+    letterSpacing: 1.2,
+  },
+  mono: {
+    fontSize: 12,
+    lineHeight: 16,
     fontFamily: 'monospace',
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
+    letterSpacing: 0.5,
+  },
+  monoSmall: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontFamily: 'monospace',
+    fontWeight: '600' as const,
+    letterSpacing: 0.5,
+  },
+  hudLabel: {
+    fontSize: 10,
+    lineHeight: 13,
+    fontWeight: '800' as const,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase' as const,
   },
 };
 
 export const NomadTheme = {
   colors: {
-    
     background: DarkThemeColors.primaryBackground,
     surface: DarkThemeColors.surface,
     surfaceElevated: DarkThemeColors.surfaceElevated,
     surfaceBorder: DarkThemeColors.border,
 
-    
     brandNavy: DarkThemeColors.brandNavy,
     actionBlue: DarkThemeColors.actionBlue,
     accent: DarkThemeColors.actionBlue,
@@ -183,7 +222,6 @@ export const NomadTheme = {
     accentDark: '#1D4ED8',
     accentDim: DarkThemeColors.actionBlueSubtle,
 
-    
     emergencyRed: DarkThemeColors.emergencyRed,
     emergencyRedDim: DarkThemeColors.emergencyRedSubtle,
     successGreen: DarkThemeColors.successGreen,
@@ -193,16 +231,19 @@ export const NomadTheme = {
     infoBlue: DarkThemeColors.actionBlue,
     infoBlueDim: DarkThemeColors.actionBlueSubtle,
 
-    
     textPrimary: DarkThemeColors.primaryText,
     textSecondary: DarkThemeColors.secondaryText,
     textMuted: DarkThemeColors.mutedText,
     textInverse: DarkThemeColors.inverseText,
 
-    
     rssiStrong: DarkThemeColors.rssiStrong,
     rssiMedium: DarkThemeColors.rssiMedium,
     rssiWeak: DarkThemeColors.rssiWeak,
+
+    tacticalGreen: DarkThemeColors.tacticalGreen,
+    tacticalAmber: DarkThemeColors.tacticalAmber,
+    tacticalCyan: DarkThemeColors.tacticalCyan,
+    tacticalGrid: DarkThemeColors.tacticalGrid,
   },
   spacing: {
     xs: NomadSpacing.xs,

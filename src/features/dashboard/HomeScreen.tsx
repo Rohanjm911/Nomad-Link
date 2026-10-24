@@ -14,7 +14,8 @@ import {
   NomadTypography,
 } from '../../theme/NomadTheme';
 import { SectionHeader } from '../../components/FeedbackStates';
-import { TrustBadge } from '../../components/Badges';
+import { TrustBadge, SignalMeter, TransportBadge } from '../../components/Badges';
+import { TacticalActionButton } from '../../components/Buttons';
 
 interface HomeScreenProps {
   onNavigate: (tab: string) => void;
@@ -22,12 +23,13 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
   const {
-    identity,
     peers,
     deadReckoning,
     isRadioScanning,
     isBackgroundServiceActive,
     convoy,
+    startDiscovery,
+    stopDiscovery,
   } = useNomad();
 
   const trustedPeersCount = peers.filter(p => p.trustStatus === 'TRUSTED').length;
@@ -35,172 +37,250 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      
-      <View style={styles.topHeader}>
-        <View>
-          <Text style={styles.brandTitle}>NOMAD LINK</Text>
-          <Text style={styles.brandTagline}>NO SIGNAL. NO LIMITS.</Text>
+      {/* TACTICAL SUB-HEADER MISSION TELEMETRY STRIP */}
+      <View style={styles.missionStrip}>
+        <View style={styles.missionStripLeft}>
+          <View style={styles.hudCrosshair} />
+          <Text style={styles.missionLabel}>SYS BUS // SECURE P2P DTN ROUTER</Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.identityCard}
-          onPress={() => onNavigate('Settings')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.identityAlias}>{identity.alias}</Text>
-          <Text style={styles.identityId}>
-            {identity.peerId.slice(0, 8)}...{identity.peerId.slice(-4)}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.missionTimestamp}>
+          UTC {new Date().toISOString().slice(11, 19)}Z
+        </Text>
       </View>
 
-      
-      <View style={styles.statusCard}>
-        <View style={styles.statusRow}>
-          <View style={styles.statusTitleRow}>
+      {/* TACTICAL RF STATUS HUD CARD */}
+      <View style={styles.tacticalHudCard}>
+        <View style={styles.hudCardHeader}>
+          <View style={styles.hudTitleRow}>
             <View
               style={[
-                styles.statusDot,
-                { backgroundColor: isRadioScanning ? DarkThemeColors.successGreen : DarkThemeColors.mutedText },
+                styles.hudLedDot,
+                isRadioScanning ? styles.ledGreen : styles.ledAmber,
               ]}
             />
-            <Text style={styles.statusTitle}>
-              {isRadioScanning ? 'OFFLINE MESH RADIO ACTIVE' : 'RADIO STANDBY'}
+            <Text style={styles.hudCardTitle}>
+              {isRadioScanning ? 'OFFLINE RF MESH: ONLINE' : 'RF TRANSCEIVER: STANDBY'}
             </Text>
           </View>
-          <View style={styles.protocolBadge}>
-            <Text style={styles.protocolBadgeText}>BLE + P2P</Text>
+          <View style={styles.tacticalModeBadge}>
+            <Text style={styles.tacticalModeText}>BLE 5.2 + L2CAP</Text>
           </View>
         </View>
 
-        <Text style={styles.statusBody}>
+        <Text style={styles.hudCardBody}>
           {peers.length > 0
-            ? `Connected directly and via relay to ${peers.length} compatible peer${peers.length === 1 ? '' : 's'}. Store-and-forward active.`
-            : 'Scanning nearby BLE GATT frequencies. No compatible mesh peers discovered yet.'}
+            ? `Active store-and-forward mesh routing over ${peers.length} discovered radio node${peers.length === 1 ? '' : 's'}. End-to-end cryptographic envelope validation active.`
+            : 'BLE GATT advertisement & observation bus listening. No adjacent compatible nodes in range.'}
         </Text>
 
-        <View style={styles.divider} />
+        <View style={styles.hudDivider} />
 
-        <View style={styles.metricsGrid}>
-          <View style={styles.metricItem}>
-            <Text style={styles.metricVal}>{peers.length}</Text>
-            <Text style={styles.metricLabel}>Discovered</Text>
+        {/* 4-GAUGE TACTICAL TELEMETRY MATRIX */}
+        <View style={styles.matrixGrid}>
+          <View style={styles.matrixItem}>
+            <Text style={styles.matrixIndex}>01</Text>
+            <Text style={styles.matrixValue}>{peers.length}</Text>
+            <Text style={styles.matrixLabel}>DISCOVERED</Text>
           </View>
-          <View style={styles.metricItem}>
-            <Text style={[styles.metricVal, { color: DarkThemeColors.successGreen }]}>
+
+          <View style={styles.matrixItem}>
+            <Text style={styles.matrixIndex}>02</Text>
+            <Text style={[styles.matrixValue, { color: DarkThemeColors.tacticalGreen }]}>
               {trustedPeersCount}
             </Text>
-            <Text style={styles.metricLabel}>Verified Trust</Text>
+            <Text style={styles.matrixLabel}>VERIFIED</Text>
           </View>
-          <View style={styles.metricItem}>
-            <Text style={styles.metricVal}>{activeMembersCount}</Text>
-            <Text style={styles.metricLabel}>Convoy Nodes</Text>
+
+          <View style={styles.matrixItem}>
+            <Text style={styles.matrixIndex}>03</Text>
+            <Text style={[styles.matrixValue, { color: DarkThemeColors.tacticalCyan }]}>
+              {activeMembersCount}
+            </Text>
+            <Text style={styles.matrixLabel}>CONVOY</Text>
           </View>
-          <View style={styles.metricItem}>
+
+          <View style={styles.matrixItem}>
+            <Text style={styles.matrixIndex}>04</Text>
             <Text
               style={[
-                styles.metricVal,
+                styles.matrixValue,
                 {
                   color: isBackgroundServiceActive
-                    ? DarkThemeColors.successGreen
-                    : DarkThemeColors.warningAmber,
+                    ? DarkThemeColors.tacticalGreen
+                    : DarkThemeColors.tacticalAmber,
                 },
               ]}
             >
               {isBackgroundServiceActive ? 'ACTIVE' : 'IDLE'}
             </Text>
-            <Text style={styles.metricLabel}>Relay Service</Text>
+            <Text style={styles.matrixLabel}>DTN RELAY</Text>
           </View>
         </View>
       </View>
 
-      
+      {/* QUICK TACTICAL TOOLBAR */}
+      <View style={styles.quickToolbar}>
+        <TacticalActionButton
+          label="BROADCAST ALL"
+          icon="💬"
+          accent="cyan"
+          onPress={() => onNavigate('Messages')}
+          style={{ flex: 1 }}
+        />
+        <TacticalActionButton
+          label={isRadioScanning ? 'HALT SCAN' : 'RADAR SWEEP'}
+          icon="📡"
+          accent={isRadioScanning ? 'amber' : 'green'}
+          onPress={isRadioScanning ? stopDiscovery : startDiscovery}
+          style={{ flex: 1 }}
+        />
+        <TacticalActionButton
+          label="DISTRESS SOS"
+          icon="🚨"
+          accent="red"
+          onPress={() => onNavigate('Emergency')}
+          style={{ flex: 1 }}
+        />
+      </View>
+
+      {/* SECTION 1: NEARBY MESH NODES */}
       <SectionHeader
-        title="Nearby Mesh Devices"
-        actionText="Mesh Radar →"
+        title="Adjacent Mesh Nodes"
+        actionText="RADAR VIEW >"
         onAction={() => onNavigate('Mesh')}
       />
-      {peers.slice(0, 2).map(peer => (
-        <View key={peer.peerId} style={styles.peerCard}>
-          <View style={styles.peerCardRow}>
-            <View>
-              <Text style={styles.peerAlias}>{peer.alias}</Text>
-              <Text style={styles.peerFingerprint}>Fingerprint: {peer.safetyNumber}</Text>
-            </View>
-            <TrustBadge status={peer.trustStatus} />
-          </View>
-          <View style={styles.peerMetaRow}>
-            <Text style={styles.peerMeta}>
-              Signal: {peer.rssi ? `${peer.rssi} dBm` : 'Direct'} · Transport: {peer.transportType}
-            </Text>
-            <TouchableOpacity onPress={() => onNavigate('Messages')}>
-              <Text style={styles.messageLink}>Send Message →</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
 
-      
+      {peers.length === 0 ? (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyCardText}>
+            [NO NODES CURRENTLY WITHIN RF SCAN HORIZON]
+          </Text>
+          <Text style={styles.emptyCardSub}>
+            Initiate radar sweep or verify nearby transceiver antennas.
+          </Text>
+        </View>
+      ) : (
+        peers.slice(0, 2).map(peer => (
+          <View key={peer.peerId} style={styles.peerCard}>
+            <View style={styles.peerCardHeader}>
+              <View>
+                <View style={styles.peerAliasRow}>
+                  <Text style={styles.peerAlias}>{peer.alias.toUpperCase()}</Text>
+                  <TransportBadge type={peer.transportType} />
+                </View>
+                <Text style={styles.peerSafetyMono}>
+                  FP: {peer.safetyNumber || 'UNKNOWN'}
+                </Text>
+              </View>
+              <TrustBadge status={peer.trustStatus} />
+            </View>
+
+            <View style={styles.peerMetaRow}>
+              <SignalMeter rssi={peer.rssi} />
+              <TouchableOpacity
+                style={styles.txActionBtn}
+                onPress={() => onNavigate('Messages')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.txActionText}>[TRANSMIT COMMS &gt;]</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))
+      )}
+
+      {/* SECTION 2: CONVOY TELEMETRY */}
       <SectionHeader
-        title="Convoy Operations"
-        actionText="View Convoy →"
+        title="Convoy Operations Telemetry"
+        actionText="CONVOY HUD >"
         onAction={() => onNavigate('Convoy')}
       />
       <TouchableOpacity
-        style={styles.card}
+        style={styles.tacticalCard}
         onPress={() => onNavigate('Convoy')}
         activeOpacity={0.8}
       >
         <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardTitle}>{convoy.convoyName}</Text>
-          <View style={styles.convoyStatusBadge}>
-            <Text style={styles.convoyStatusText}>{convoy.members.length} MEMBERS</Text>
+          <View style={styles.formationRow}>
+            <Text style={styles.formationIcon}>🚙</Text>
+            <Text style={styles.formationName}>{convoy.convoyName.toUpperCase()}</Text>
+          </View>
+          <View style={styles.convoyStatusPill}>
+            <Text style={styles.convoyStatusText}>[{convoy.members.length} UNITS IN FORMATION]</Text>
           </View>
         </View>
-        <Text style={styles.cardBodyText}>
-          Lead: {convoy.members.find(m => m.isLeader)?.alias || 'Unassigned'} · Last sync 4s ago.
-          Expedition path through remote mountain pass.
+        <Text style={styles.convoyLeadText}>
+          LEAD VEHICLE: {convoy.members.find(m => m.isLeader)?.alias?.toUpperCase() || 'STANDALONE'} · SYNC DELTA: &lt;4S
+        </Text>
+        <Text style={styles.convoyRouteText}>
+          Expedition path snap active via Mesh DR relay.
         </Text>
       </TouchableOpacity>
 
-      
+      {/* SECTION 3: NAVIGATION & POSITION FIX */}
       <SectionHeader
-        title="Offline Navigation & Fix Quality"
-        actionText="Open Map →"
+        title="Position Fix & Dead Reckoning"
+        actionText="MAPS HUD >"
         onAction={() => onNavigate('Maps')}
       />
       <TouchableOpacity
-        style={styles.card}
+        style={styles.tacticalCard}
         onPress={() => onNavigate('Maps')}
         activeOpacity={0.8}
       >
         <View style={styles.cardHeaderRow}>
           <Text style={styles.coordDisplay}>
-            {deadReckoning.latitude.toFixed(5)}° N, {deadReckoning.longitude.toFixed(5)}° E
+            {deadReckoning.latitude.toFixed(5)}° N · {deadReckoning.longitude.toFixed(5)}° E
           </Text>
-          <Text
+          <View
             style={[
-              styles.fixBadge,
-              {
-                color: deadReckoning.isGpsActive
-                  ? DarkThemeColors.successGreen
-                  : DarkThemeColors.warningAmber,
-              },
+              styles.fixPill,
+              deadReckoning.isGpsActive ? styles.fixGnss : styles.fixDr,
             ]}
           >
-            {deadReckoning.isGpsActive ? '● GNSS FIX' : '▲ INERTIAL DR'}
+            <Text
+              style={[
+                styles.fixPillText,
+                deadReckoning.isGpsActive ? styles.fixTextGnss : styles.fixTextDr,
+              ]}
+            >
+              {deadReckoning.isGpsActive ? '[● GNSS 3D LOCK]' : '[▲ INERTIAL DR FIX]'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.telemetryGaugesRow}>
+          <View style={styles.telemetryBox}>
+            <Text style={styles.telemetryBoxLabel}>HEADING</Text>
+            <Text style={styles.telemetryBoxVal}>
+              {deadReckoning.headingDegrees.toFixed(0).padStart(3, '0')}°
+            </Text>
+          </View>
+
+          <View style={styles.telemetryBox}>
+            <Text style={styles.telemetryBoxLabel}>GROUND VEL</Text>
+            <Text style={styles.telemetryBoxVal}>
+              {(deadReckoning.estimatedSpeedMps * 3.6).toFixed(1)} KM/H
+            </Text>
+          </View>
+
+          <View style={styles.telemetryBox}>
+            <Text style={styles.telemetryBoxLabel}>RADIUS ERR</Text>
+            <Text style={styles.telemetryBoxVal}>
+              ±{deadReckoning.uncertaintyRadiusMeters}M
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.cacheRow}>
+          <Text style={styles.cacheText}>
+            OFFLINE SECTOR: LADAKH (482 MB CACHED VECTOR TILES READY)
           </Text>
         </View>
-        <Text style={styles.cardBodyText}>
-          HDG: {deadReckoning.headingDegrees.toFixed(0)}° · VEL: {(deadReckoning.estimatedSpeedMps * 3.6).toFixed(1)} km/h · Uncertainty: ±{deadReckoning.uncertaintyRadiusMeters}m
-        </Text>
-        <Text style={styles.mapStorageNote}>
-          Offline Map: Ladakh Sector (Offline Cache Ready, 482 MB)
-        </Text>
       </TouchableOpacity>
 
-      
-      <SectionHeader title="Emergency Readiness" />
+      {/* SECTION 4: EMERGENCY READINESS */}
+      <SectionHeader title="Distress Readiness" />
       <TouchableOpacity
         style={styles.emergencyCard}
         onPress={() => onNavigate('Emergency')}
@@ -212,10 +292,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         <View style={styles.emergencyTextWrap}>
           <Text style={styles.emergencyTitle}>EMERGENCY SOS DISTRESS BEACON</Text>
           <Text style={styles.emergencySubtitle}>
-            Broadcast priority rescue request with GPS coordinates to all nodes in mesh range.
+            Broadcast priority rescue envelope with GPS & DR fix to every node in transceiver horizon.
           </Text>
         </View>
-        <Text style={styles.emergencyChevron}>→</Text>
+        <Text style={styles.emergencyChevron}>[TX &gt;]</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -227,139 +307,194 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.primaryBackground,
   },
   content: {
-    padding: NomadSpacing.lg,
+    padding: NomadSpacing.md,
     paddingBottom: NomadSpacing.xxl,
   },
-  topHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: NomadSpacing.lg,
-    paddingTop: NomadSpacing.xs,
-  },
-  brandTitle: {
-    ...NomadTypography.screenHeading,
-    color: DarkThemeColors.primaryText,
-    letterSpacing: 1.5,
-  },
-  brandTagline: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.actionBlue,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  identityCard: {
-    backgroundColor: DarkThemeColors.surface,
-    borderWidth: 1,
-    borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    paddingHorizontal: NomadSpacing.md,
-    paddingVertical: NomadSpacing.xs + 2,
-    alignItems: 'flex-end',
-  },
-  identityAlias: {
-    ...NomadTypography.supportingMedium,
-    color: DarkThemeColors.primaryText,
-  },
-  identityId: {
-    ...NomadTypography.mono,
-    fontSize: 10,
-    color: DarkThemeColors.mutedText,
-  },
-  statusCard: {
-    backgroundColor: DarkThemeColors.surface,
-    borderWidth: 1,
-    borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.lg,
-    marginBottom: NomadSpacing.md,
-  },
-  statusRow: {
+  missionStrip: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: NomadSpacing.sm,
+    paddingHorizontal: NomadSpacing.xs,
   },
-  statusTitleRow: {
+  missionStripLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: NomadSpacing.sm,
-  },
-  statusTitle: {
-    ...NomadTypography.supportingMedium,
-    color: DarkThemeColors.primaryText,
-    letterSpacing: 0.5,
-  },
-  protocolBadge: {
-    backgroundColor: DarkThemeColors.actionBlueSubtle,
+  hudCrosshair: {
+    width: 6,
+    height: 6,
     borderWidth: 1,
-    borderColor: DarkThemeColors.actionBlue,
-    borderRadius: NomadRadius.sm,
-    paddingHorizontal: NomadSpacing.xs + 2,
-    paddingVertical: 2,
+    borderColor: DarkThemeColors.tacticalCyan,
+    borderRadius: 1,
   },
-  protocolBadgeText: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.actionBlue,
-    fontSize: 10,
+  missionLabel: {
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.mutedText,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.0,
+  },
+  missionTimestamp: {
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.tacticalCyan,
+    fontSize: 9,
     fontWeight: '700',
   },
-  statusBody: {
-    ...NomadTypography.supporting,
-    color: DarkThemeColors.secondaryText,
-    lineHeight: 18,
-    marginTop: NomadSpacing.xs,
+  tacticalHudCard: {
+    backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.md,
+    marginBottom: NomadSpacing.sm,
   },
-  divider: {
-    height: 1,
-    backgroundColor: DarkThemeColors.border,
-    marginVertical: NomadSpacing.md,
-  },
-  metricsGrid: {
+  hudCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  metricItem: {
     alignItems: 'center',
-    flex: 1,
+    marginBottom: NomadSpacing.xs + 2,
   },
-  metricVal: {
-    ...NomadTypography.sectionHeading,
+  hudTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  hudLedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 1,
+  },
+  ledGreen: {
+    backgroundColor: DarkThemeColors.tacticalGreen,
+  },
+  ledAmber: {
+    backgroundColor: DarkThemeColors.tacticalAmber,
+  },
+  hudCardTitle: {
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.primaryText,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  tacticalModeBadge: {
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.borderSubtle,
+    borderRadius: NomadRadius.xs,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  tacticalModeText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 9,
+    color: DarkThemeColors.tacticalCyan,
     fontWeight: '700',
   },
-  metricLabel: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.mutedText,
+  hudCardBody: {
+    ...NomadTypography.supporting,
+    color: DarkThemeColors.secondaryText,
+    lineHeight: 17,
     marginTop: 2,
+  },
+  hudDivider: {
+    height: 1,
+    backgroundColor: DarkThemeColors.border,
+    marginVertical: NomadSpacing.sm + 2,
+  },
+  matrixGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  matrixItem: {
+    flex: 1,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.borderSubtle,
+    borderRadius: NomadRadius.xs,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  matrixIndex: {
+    ...NomadTypography.monoSmall,
+    fontSize: 8,
+    color: DarkThemeColors.mutedText,
+    fontWeight: '800',
+  },
+  matrixValue: {
+    ...NomadTypography.mono,
+    fontSize: 15,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '800',
+    marginTop: 1,
+  },
+  matrixLabel: {
+    ...NomadTypography.monoSmall,
+    fontSize: 7.5,
+    color: DarkThemeColors.secondaryText,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  quickToolbar: {
+    flexDirection: 'row',
+    gap: 6,
+    marginVertical: NomadSpacing.xs,
+  },
+  emptyCard: {
+    backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.md,
+    alignItems: 'center',
+    marginBottom: NomadSpacing.sm,
+  },
+  emptyCardText: {
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.mutedText,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textAlign: 'center',
+  },
+  emptyCardSub: {
+    ...NomadTypography.supporting,
+    color: DarkThemeColors.secondaryText,
+    fontSize: 11,
+    marginTop: 4,
+    textAlign: 'center',
   },
   peerCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
-    marginBottom: NomadSpacing.sm,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
+    marginBottom: NomadSpacing.xs + 2,
   },
-  peerCardRow: {
+  peerCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: NomadSpacing.xs,
+  },
+  peerAliasRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   peerAlias: {
-    ...NomadTypography.bodyMedium,
-    color: DarkThemeColors.primaryText,
-  },
-  peerFingerprint: {
     ...NomadTypography.mono,
-    fontSize: 11,
+    fontSize: 13,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  peerSafetyMono: {
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
     color: DarkThemeColors.mutedText,
     marginTop: 2,
   },
@@ -367,26 +502,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: NomadSpacing.xs,
-    paddingTop: NomadSpacing.xs,
+    marginTop: NomadSpacing.sm,
+    paddingTop: NomadSpacing.xs + 2,
     borderTopWidth: 1,
     borderTopColor: DarkThemeColors.borderSubtle,
   },
-  peerMeta: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.secondaryText,
+  txActionBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: NomadRadius.xs,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.tacticalCyan,
   },
-  messageLink: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.actionBlue,
-    fontWeight: '600',
+  txActionText: {
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.tacticalCyan,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  card: {
+  tacticalCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
     marginBottom: NomadSpacing.sm,
   },
   cardHeaderRow: {
@@ -395,42 +536,117 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: NomadSpacing.xs,
   },
-  cardTitle: {
-    ...NomadTypography.bodyMedium,
-    color: DarkThemeColors.primaryText,
+  formationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  convoyStatusBadge: {
+  formationIcon: {
+    fontSize: 13,
+  },
+  formationName: {
+    ...NomadTypography.mono,
+    fontSize: 12,
+    color: DarkThemeColors.primaryText,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  convoyStatusPill: {
     backgroundColor: DarkThemeColors.surfaceSubtle,
     borderWidth: 1,
-    borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.sm,
-    paddingHorizontal: NomadSpacing.xs + 2,
+    borderColor: DarkThemeColors.borderSubtle,
+    borderRadius: NomadRadius.xs,
+    paddingHorizontal: 6,
     paddingVertical: 2,
   },
   convoyStatusText: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
+    fontSize: 8.5,
+    color: DarkThemeColors.tacticalCyan,
+    fontWeight: '800',
+  },
+  convoyLeadText: {
+    ...NomadTypography.monoSmall,
     fontSize: 10,
     color: DarkThemeColors.secondaryText,
-    fontWeight: '700',
+    marginTop: 2,
   },
-  cardBodyText: {
+  convoyRouteText: {
     ...NomadTypography.supporting,
-    color: DarkThemeColors.secondaryText,
-    lineHeight: 18,
+    color: DarkThemeColors.mutedText,
+    fontSize: 11,
+    marginTop: 2,
   },
   coordDisplay: {
     ...NomadTypography.mono,
+    color: DarkThemeColors.tacticalCyan,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  fixPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: NomadRadius.xs,
+    borderWidth: 1,
+  },
+  fixGnss: {
+    backgroundColor: DarkThemeColors.successGreenSubtle,
+    borderColor: DarkThemeColors.tacticalGreen,
+  },
+  fixDr: {
+    backgroundColor: DarkThemeColors.warningAmberSubtle,
+    borderColor: DarkThemeColors.tacticalAmber,
+  },
+  fixPillText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 8.5,
+    fontWeight: '800',
+  },
+  fixTextGnss: {
+    color: DarkThemeColors.tacticalGreen,
+  },
+  fixTextDr: {
+    color: DarkThemeColors.tacticalAmber,
+  },
+  telemetryGaugesRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: NomadSpacing.xs + 2,
+  },
+  telemetryBox: {
+    flex: 1,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.borderSubtle,
+    borderRadius: NomadRadius.xs,
+    padding: 6,
+    alignItems: 'center',
+  },
+  telemetryBoxLabel: {
+    ...NomadTypography.monoSmall,
+    fontSize: 7.5,
+    color: DarkThemeColors.mutedText,
+    fontWeight: '800',
+  },
+  telemetryBoxVal: {
+    ...NomadTypography.mono,
+    fontSize: 11,
     color: DarkThemeColors.primaryText,
     fontWeight: '700',
+    marginTop: 2,
   },
-  fixBadge: {
-    ...NomadTypography.metadata,
-    fontWeight: '700',
+  cacheRow: {
+    marginTop: NomadSpacing.xs + 2,
+    paddingTop: NomadSpacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: DarkThemeColors.borderSubtle,
   },
-  mapStorageNote: {
-    ...NomadTypography.metadata,
+  cacheText: {
+    ...NomadTypography.monoSmall,
+    fontSize: 8.5,
     color: DarkThemeColors.mutedText,
-    marginTop: NomadSpacing.xs,
+    fontWeight: '700',
   },
   emergencyCard: {
     flexDirection: 'row',
@@ -438,34 +654,36 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.emergencyRedSubtle,
     borderWidth: 1,
     borderColor: DarkThemeColors.emergencyRed,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
     marginTop: NomadSpacing.xs,
   },
   emergencyIconWrap: {
-    marginRight: NomadSpacing.md,
+    marginRight: NomadSpacing.sm,
   },
   emergencyIcon: {
-    fontSize: 24,
+    fontSize: 20,
   },
   emergencyTextWrap: {
     flex: 1,
   },
   emergencyTitle: {
-    ...NomadTypography.supportingMedium,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.emergencyRed,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
   emergencySubtitle: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
+    fontSize: 11,
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 15,
   },
   emergencyChevron: {
-    fontSize: 18,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.emergencyRed,
-    fontWeight: '700',
-    marginLeft: NomadSpacing.sm,
+    fontWeight: '800',
+    marginLeft: NomadSpacing.xs,
   },
 });

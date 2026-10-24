@@ -13,12 +13,14 @@ export const EmptyState: React.FC<{
 }> = ({ title, description, icon = '📡', actionLabel, onAction, style }) => {
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.icon}>{icon}</Text>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.radarRing}>
+        <Text style={styles.icon}>{icon}</Text>
+      </View>
+      <Text style={styles.title}>[ {title.toUpperCase()} ]</Text>
       <Text style={styles.description}>{description}</Text>
       {actionLabel && onAction ? (
         <View style={styles.actionWrap}>
-          <PrimaryButton label={actionLabel} onPress={onAction} />
+          <PrimaryButton label={actionLabel} onPress={onAction} variant="tactical" />
         </View>
       ) : null}
     </View>
@@ -31,11 +33,13 @@ export const ErrorState: React.FC<{
   retryLabel?: string;
   onRetry?: () => void;
   style?: ViewStyle;
-}> = ({ title, message, retryLabel = 'Try Again', onRetry, style }) => {
+}> = ({ title, message, retryLabel = 'Retry Transmission', onRetry, style }) => {
   return (
     <View style={[styles.container, styles.errorContainer, style]}>
       <Text style={styles.errorIcon}>⚠️</Text>
-      <Text style={[styles.title, { color: DarkThemeColors.emergencyRed }]}>{title}</Text>
+      <Text style={[styles.title, { color: DarkThemeColors.emergencyRed }]}>
+        [ALERT: {title.toUpperCase()}]
+      </Text>
       <Text style={styles.description}>{message}</Text>
       {onRetry ? (
         <View style={styles.actionWrap}>
@@ -54,10 +58,13 @@ export const SectionHeader: React.FC<{
 }> = ({ title, actionText, onAction, style }) => {
   return (
     <View style={[styles.sectionHeaderRow, style]}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.titleWrap}>
+        <View style={styles.sectionDot} />
+        <Text style={styles.sectionTitle}>// {title.toUpperCase()} //</Text>
+      </View>
       {actionText && onAction ? (
         <Text style={styles.sectionAction} onPress={onAction}>
-          {actionText}
+          [{actionText}]
         </Text>
       ) : null}
     </View>
@@ -66,43 +73,55 @@ export const SectionHeader: React.FC<{
 
 const styles = StyleSheet.create({
   container: {
-    padding: NomadSpacing.xl,
+    padding: NomadSpacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: DarkThemeColors.surface,
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.xs,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
     marginVertical: NomadSpacing.md,
   },
-  errorContainer: {
-    borderColor: DarkThemeColors.emergencyRedSubtle,
+  radarRing: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.border,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: NomadSpacing.md,
     backgroundColor: DarkThemeColors.surfaceSubtle,
   },
+  errorContainer: {
+    borderColor: DarkThemeColors.emergencyRed,
+    backgroundColor: DarkThemeColors.emergencyRedSubtle,
+  },
   icon: {
-    fontSize: 32,
-    marginBottom: NomadSpacing.md,
+    fontSize: 26,
   },
   errorIcon: {
-    fontSize: 32,
-    marginBottom: NomadSpacing.md,
+    fontSize: 26,
+    marginBottom: NomadSpacing.sm,
     color: DarkThemeColors.emergencyRed,
   },
   title: {
-    ...NomadTypography.sectionHeading,
+    ...NomadTypography.mono,
     color: DarkThemeColors.primaryText,
     textAlign: 'center',
     marginBottom: NomadSpacing.xs,
+    letterSpacing: 1.2,
   },
   description: {
     ...NomadTypography.supporting,
     color: DarkThemeColors.secondaryText,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
     maxWidth: 320,
   },
   actionWrap: {
-    marginTop: NomadSpacing.lg,
+    marginTop: NomadSpacing.md,
     width: '100%',
     maxWidth: 240,
   },
@@ -111,17 +130,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: NomadSpacing.lg,
-    marginBottom: NomadSpacing.sm,
+    marginBottom: NomadSpacing.xs + 2,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkThemeColors.borderSubtle,
+  },
+  titleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sectionDot: {
+    width: 4,
+    height: 4,
+    backgroundColor: DarkThemeColors.tacticalCyan,
+    borderRadius: 1,
   },
   sectionTitle: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.mutedText,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    fontWeight: '800',
   },
   sectionAction: {
-    ...NomadTypography.metadata,
-    color: DarkThemeColors.actionBlue,
-    fontWeight: '600',
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.tacticalCyan,
+    fontWeight: '700',
+    letterSpacing: 0.8,
   },
 });

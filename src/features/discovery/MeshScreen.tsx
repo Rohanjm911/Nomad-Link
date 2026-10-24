@@ -16,7 +16,7 @@ import {
   NomadTypography,
 } from '../../theme/NomadTheme';
 import { TrustStatus, PeerRecord } from '../../domain/models/DomainModels';
-import { TrustBadge, TransportBadge } from '../../components/Badges';
+import { TrustBadge, TransportBadge, SignalMeter } from '../../components/Badges';
 import { PrimaryButton, SecondaryButton, DangerButton } from '../../components/Buttons';
 import { SectionHeader } from '../../components/FeedbackStates';
 
@@ -32,27 +32,28 @@ export const MeshScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'list' | 'topology'>('list');
   const [selectedPeerForVerify, setSelectedPeerForVerify] = useState<PeerRecord | null>(null);
 
-  const getRssiColor = (rssi?: number) => {
-    if (!rssi) return DarkThemeColors.mutedText;
-    if (rssi > -65) return DarkThemeColors.rssiStrong;
-    if (rssi > -80) return DarkThemeColors.rssiMedium;
-    return DarkThemeColors.rssiWeak;
-  };
-
   const handleVerifyPrompt = (peer: PeerRecord) => {
     setSelectedPeerForVerify(peer);
   };
 
   return (
     <View style={styles.container}>
-      
+      {/* TACTICAL RADAR HUD HEADER */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>OFFLINE MESH RADAR</Text>
+          <View style={styles.headerTitleRow}>
+            <View
+              style={[
+                styles.radarLed,
+                isRadioScanning ? styles.radarLedActive : styles.radarLedIdle,
+              ]}
+            />
+            <Text style={styles.title}>// OFFLINE RF MESH RADAR //</Text>
+          </View>
           <Text style={styles.subtitle}>
             {isRadioScanning
-              ? 'Discovering BLE GATT Radios & Wi-Fi Direct Links'
-              : 'Radio Scanning Inactive · Manual Standby'}
+              ? 'ACTIVE OBSERVATION // BLE GATT RADIOS & WI-FI DIRECT'
+              : 'TRANSCEIVER STANDBY // MANUAL SCAN REQUIRED'}
           </Text>
         </View>
 
@@ -62,19 +63,19 @@ export const MeshScreen: React.FC = () => {
           activeOpacity={0.8}
         >
           <Text style={[styles.scanBtnText, isRadioScanning && styles.scanBtnTextActive]}>
-            {isRadioScanning ? 'STOP SCAN' : 'START SCAN'}
+            {isRadioScanning ? '[HALT SCAN]' : '[RADAR SWEEP]'}
           </Text>
         </TouchableOpacity>
       </View>
 
-      
+      {/* TACTICAL TAB SWITCHER */}
       <View style={styles.tabSwitcher}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === 'list' && styles.tabButtonActive]}
           onPress={() => setActiveTab('list')}
         >
           <Text style={[styles.tabButtonText, activeTab === 'list' && styles.tabButtonTextActive]}>
-            Device List ({peers.length})
+            // 01 NODE LIST ({peers.length}) //
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -82,13 +83,13 @@ export const MeshScreen: React.FC = () => {
           onPress={() => setActiveTab('topology')}
         >
           <Text style={[styles.tabButtonText, activeTab === 'topology' && styles.tabButtonTextActive]}>
-            Mesh Topology
+            // 02 MESH TOPOLOGY //
           </Text>
         </TouchableOpacity>
       </View>
 
       {activeTab === 'list' ? (
-        
+        /* DISCOVERED PEERS LIST */
         <FlatList
           data={peers}
           keyExtractor={item => item.peerId}
@@ -101,41 +102,36 @@ export const MeshScreen: React.FC = () => {
                 <View style={styles.peerCardHeader}>
                   <View style={styles.peerInfoWrap}>
                     <View style={styles.nameRow}>
-                      <Text style={styles.peerAlias}>{item.alias}</Text>
+                      <Text style={styles.peerAlias}>{item.alias.toUpperCase()}</Text>
                       <TransportBadge type={item.transportType} style={styles.transportTag} />
                     </View>
                     <Text style={styles.peerIdText}>
-                      Ed25519: {item.peerId.slice(0, 16)}...
+                      ED25519: {item.peerId.slice(0, 16)}...
                     </Text>
                   </View>
 
-                  <View style={styles.signalBadge}>
-                    <Text style={[styles.rssiValue, { color: getRssiColor(item.rssi) }]}>
-                      {item.rssi ? `${item.rssi} dBm` : 'N/A'}
-                    </Text>
-                    <Text style={styles.rssiLabel}>Signal RSSI</Text>
-                  </View>
+                  <SignalMeter rssi={item.rssi} />
                 </View>
 
                 <View style={styles.divider} />
 
-                
+                {/* SAFETY NUMBER FINGERPRINT ROW */}
                 <View style={styles.securityRow}>
                   <View style={styles.fingerprintCol}>
-                    <Text style={styles.safetyLabel}>SAFETY NUMBER FINGERPRINT</Text>
-                    <Text style={styles.safetyNumber}>{item.safetyNumber}</Text>
+                    <Text style={styles.safetyLabel}>// SAFETY FINGERPRINT AUTH //</Text>
+                    <Text style={styles.safetyNumber}>{item.safetyNumber || 'UNAUTHENTICATED'}</Text>
                   </View>
                   <TrustBadge status={item.trustStatus} />
                 </View>
 
-                
+                {/* TACTICAL TRUST ACTIONS */}
                 <View style={styles.actionRow}>
                   <TouchableOpacity
                     style={styles.verifyBtn}
                     onPress={() => handleVerifyPrompt(item)}
                   >
                     <Text style={styles.verifyBtnText}>
-                      {isTrusted ? 'Inspect Verification' : 'Verify Safety Number'}
+                      {isTrusted ? '[INSPECT AUTH]' : '[VERIFY SAFETY NUMBER]'}
                     </Text>
                   </TouchableOpacity>
 
@@ -144,14 +140,14 @@ export const MeshScreen: React.FC = () => {
                       style={styles.revokeBtn}
                       onPress={() => updatePeerTrust(item.peerId, TrustStatus.DISCOVERED)}
                     >
-                      <Text style={styles.revokeBtnText}>Revoke Trust</Text>
+                      <Text style={styles.revokeBtnText}>[REVOKE TRUST]</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
                       style={styles.trustDirectBtn}
                       onPress={() => updatePeerTrust(item.peerId, TrustStatus.TRUSTED)}
                     >
-                      <Text style={styles.trustDirectText}>Trust Device</Text>
+                      <Text style={styles.trustDirectText}>[AUTHORIZE NODE]</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -160,26 +156,26 @@ export const MeshScreen: React.FC = () => {
           }}
         />
       ) : (
-        
+        /* MESH TOPOLOGY VISUALIZER */
         <View style={styles.topologyContainer}>
-          <Text style={styles.topologyTitle}>ESTABLISHED PEER-TO-PEER MESH TOPOLOGY</Text>
+          <Text style={styles.topologyTitle}>// ESTABLISHED PEER-TO-PEER MESH TOPOLOGY //</Text>
           <Text style={styles.topologySubtitle}>
-            Represents verified link states. Solid lines depict active multi-hop store-and-forward routes.
+            Represents authenticated link states. Solid lines depict active multi-hop store-and-forward routes.
           </Text>
 
           <View style={styles.topologyCanvas}>
-            
+            {/* ORIGIN / LOCAL NODE */}
             <View style={styles.localNode}>
-              <Text style={styles.nodeIcon}>⚡</Text>
-              <Text style={styles.nodeAlias}>You (Alpha)</Text>
-              <Text style={styles.nodeMeta}>Origin</Text>
+              <Text style={styles.nodeIcon}>⬢</Text>
+              <Text style={styles.nodeAlias}>LOCAL [YOU]</Text>
+              <Text style={styles.nodeMeta}>ORIGIN TRANSCEIVER</Text>
             </View>
 
             <View style={styles.topologyLine} />
 
-            
+            {/* ADJACENT PEERS MESH */}
             <View style={styles.nodesGrid}>
-              {peers.map((peer, idx) => (
+              {peers.map((peer, _idx) => (
                 <View key={peer.peerId} style={styles.peerNode}>
                   <View
                     style={[
@@ -189,30 +185,35 @@ export const MeshScreen: React.FC = () => {
                   >
                     <Text style={styles.nodeIcon}>📡</Text>
                   </View>
-                  <Text style={styles.peerNodeAlias}>{peer.alias}</Text>
-                  <Text style={styles.peerNodeHops}>Direct BLE Link</Text>
+                  <Text style={styles.peerNodeAlias}>{peer.alias.toUpperCase()}</Text>
+                  <Text style={styles.peerNodeHops}>DIRECT BLE LINK</Text>
                   <Text
                     style={[
                       styles.peerNodeTrust,
                       {
                         color:
                           peer.trustStatus === TrustStatus.TRUSTED
-                            ? DarkThemeColors.successGreen
-                            : DarkThemeColors.warningAmber,
+                            ? DarkThemeColors.tacticalGreen
+                            : DarkThemeColors.secondaryText,
                       },
                     ]}
                   >
-                    {peer.trustStatus === TrustStatus.TRUSTED ? '● Verified' : '▲ Unverified'}
+                    [{peer.trustStatus}]
                   </Text>
                 </View>
               ))}
             </View>
           </View>
 
+          {/* TOPOLOGY METRICS FOOTER */}
           <View style={styles.topologyLegend}>
-            <Text style={styles.legendItem}>● Solid Box: Directly connected BLE GATT link</Text>
-            <Text style={styles.legendItem}>● Store-and-forward DTN queue limit: 250 envelopes</Text>
-            <Text style={styles.legendItem}>● Max hop limit: 7 relay transitions</Text>
+            <Text style={styles.legendTitle}>// MESH ROUTING PROTOCOL STATS //</Text>
+            <Text style={styles.legendBody}>
+              • Multi-hop TTL limit: 7 hops · Store-and-forward DTN cache buffer: 50 messages
+            </Text>
+            <Text style={styles.legendBody}>
+              • Transport protocol: BLE 5.2 Extended L2CAP with fallback to Wi-Fi Direct
+            </Text>
           </View>
         </View>
       )}
@@ -284,21 +285,39 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: DarkThemeColors.border,
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  radarLed: {
+    width: 6,
+    height: 6,
+    borderRadius: 1,
+  },
+  radarLedActive: {
+    backgroundColor: DarkThemeColors.tacticalGreen,
+  },
+  radarLedIdle: {
+    backgroundColor: DarkThemeColors.tacticalAmber,
+  },
   title: {
-    ...NomadTypography.sectionHeading,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.primaryText,
-    letterSpacing: 1,
+    letterSpacing: 1.2,
+    fontWeight: '800',
   },
   subtitle: {
-    ...NomadTypography.metadata,
+    ...NomadTypography.monoSmall,
     color: DarkThemeColors.secondaryText,
-    marginTop: 2,
+    fontSize: 9,
+    marginTop: 3,
     maxWidth: 240,
   },
   scanBtn: {
-    paddingHorizontal: NomadSpacing.md,
-    paddingVertical: NomadSpacing.sm,
-    borderRadius: NomadRadius.md,
+    paddingHorizontal: NomadSpacing.sm + 2,
+    paddingVertical: NomadSpacing.xs + 2,
+    borderRadius: NomadRadius.xs,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -308,13 +327,15 @@ const styles = StyleSheet.create({
     borderColor: DarkThemeColors.emergencyRed,
   },
   scanBtnInactive: {
-    backgroundColor: DarkThemeColors.actionBlue,
-    borderColor: DarkThemeColors.actionBlue,
+    backgroundColor: DarkThemeColors.surfaceSubtle,
+    borderColor: DarkThemeColors.tacticalCyan,
   },
   scanBtnText: {
-    ...NomadTypography.button,
-    fontSize: 12,
-    color: '#FFFFFF',
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
+    color: DarkThemeColors.tacticalCyan,
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
   scanBtnTextActive: {
     color: DarkThemeColors.emergencyRed,
@@ -322,41 +343,45 @@ const styles = StyleSheet.create({
   tabSwitcher: {
     flexDirection: 'row',
     backgroundColor: DarkThemeColors.surfaceSubtle,
-    padding: 4,
-    margin: NomadSpacing.md,
-    borderRadius: NomadRadius.md,
+    padding: 3,
+    margin: NomadSpacing.sm,
+    borderRadius: NomadRadius.xs,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
+    gap: 4,
   },
   tabButton: {
     flex: 1,
-    paddingVertical: NomadSpacing.sm,
+    paddingVertical: NomadSpacing.xs + 2,
     alignItems: 'center',
-    borderRadius: NomadRadius.sm,
+    borderRadius: NomadRadius.xs,
   },
   tabButtonActive: {
     backgroundColor: DarkThemeColors.surface,
+    borderWidth: 1,
+    borderColor: DarkThemeColors.tacticalCyan,
   },
   tabButtonText: {
-    ...NomadTypography.button,
-    fontSize: 13,
+    ...NomadTypography.monoSmall,
+    fontSize: 10,
     color: DarkThemeColors.secondaryText,
-  },
-  tabButtonTextActive: {
-    color: DarkThemeColors.primaryText,
     fontWeight: '700',
   },
+  tabButtonTextActive: {
+    color: DarkThemeColors.tacticalCyan,
+    fontWeight: '800',
+  },
   listContent: {
-    paddingHorizontal: NomadSpacing.md,
+    paddingHorizontal: NomadSpacing.sm,
     paddingBottom: NomadSpacing.xl,
   },
   peerCard: {
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
-    padding: NomadSpacing.md,
-    marginBottom: NomadSpacing.md,
+    borderRadius: NomadRadius.xs,
+    padding: NomadSpacing.sm + 2,
+    marginBottom: NomadSpacing.xs + 3,
   },
   peerCardHeader: {
     flexDirection: 'row',
@@ -578,7 +603,22 @@ const styles = StyleSheet.create({
     backgroundColor: DarkThemeColors.surface,
     borderWidth: 1,
     borderColor: DarkThemeColors.border,
-    borderRadius: NomadRadius.md,
+    borderRadius: NomadRadius.xs,
+  },
+  legendTitle: {
+    ...NomadTypography.monoSmall,
+    color: DarkThemeColors.tacticalCyan,
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  legendBody: {
+    ...NomadTypography.supporting,
+    color: DarkThemeColors.secondaryText,
+    fontSize: 11,
+    lineHeight: 16,
+    marginBottom: 3,
   },
   legendItem: {
     ...NomadTypography.metadata,
