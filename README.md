@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="docs/assets/banner_animated.svg" alt="NOMAD LINK Animated Banner" width="100%" />
+</div>
+
+<br/>
+
 # NOMAD LINK
 
 > **No Signal. No Limits.**  
@@ -34,6 +40,10 @@ Operates completely without cellular network towers, satellite internet, or cent
 - Automatic message deduplication index prevents infinite forwarding loops.
 - Time-to-Live (TTL) and Hop Count (max 7 hops) enforcement drops stale packets.
 - Priority queues protect high-priority Emergency SOS beacons during memory saturation.
+
+<div align="center">
+  <img src="docs/assets/mesh_flow_animated.svg" alt="Store-and-Forward DTN Packet Lifecycle" width="100%" />
+</div>
 
 ### 3. End-to-End Cryptography (E2EE)
 - **Identity:** Locally generated Ed25519 digital signature keypairs.
@@ -78,6 +88,12 @@ Built with a high-contrast **Tactical OLED Dark Theme** (`#0a0d10`) to minimize 
 - **Offline Maps & Navigation:** Inertial dead reckoning display, bearing calculations, and waypoint trails.
 - **Tactical Channels / Groups:** Team broadcasts and coordination channels.
 - **Settings & Config:** Keystore verification, radio diagnostics, and background service toggles.
+
+<br/>
+
+<div align="center">
+  <img src="docs/assets/mesh_radar_animated.svg" alt="Tactical Offline Mesh Radar and Telemetry" width="100%" />
+</div>
 
 ---
 
