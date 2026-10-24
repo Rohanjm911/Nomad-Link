@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
+import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.uimanager.ViewManager
 import com.facebook.soloader.SoLoader
 import com.nomadlink.bluetooth.NomadBleModule
@@ -25,7 +26,6 @@ class MainApplication : Application(), ReactApplication {
         object : DefaultReactNativeHost(this) {
             override fun getPackages(): List<ReactPackage> =
                 PackageList(this).packages.apply {
-                    
                     add(object : ReactPackage {
                         override fun createNativeModules(
                             reactContext: ReactApplicationContext
@@ -46,17 +46,18 @@ class MainApplication : Application(), ReactApplication {
 
             override fun getUseDeveloperSupport(): Boolean = false
 
-            
-            
-            override val isNewArchEnabled: Boolean = false
-            override val isHermesEnabled: Boolean = true
+            override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+            override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
         }
 
     override val reactHost: ReactHost
-        get() = getDefaultReactHost(applicationContext, reactNativeHost)
+        by lazy { getDefaultReactHost(applicationContext, reactNativeHost) }
 
     override fun onCreate() {
         super.onCreate()
-        SoLoader.init(this, false)
+        SoLoader.init(this, OpenSourceMergedSoMapping)
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            load()
+        }
     }
 }
