@@ -1,11 +1,7 @@
-/**
- * NOMAD LINK - Master UI/UX Design System Tokens
- * Strict SOLID COLORS ONLY - ABSOLUTELY NO GRADIENTS.
- * Inspired by rugged expedition instruments, high daylight outdoor contrast, and clean dark mode.
- */
+
 
 export interface ThemeColors {
-  // Backgrounds & Surfaces
+  
   primaryBackground: string;
   surface: string;
   surfaceSubtle: string;
@@ -14,13 +10,13 @@ export interface ThemeColors {
   borderSubtle: string;
   borderFocus: string;
 
-  // Text
+  
   primaryText: string;
   secondaryText: string;
   mutedText: string;
   inverseText: string;
 
-  // Semantic & Tactical Accents
+  
   brandNavy: string;
   actionBlue: string;
   actionBlueHover: string;
@@ -32,7 +28,7 @@ export interface ThemeColors {
   emergencyRed: string;
   emergencyRedSubtle: string;
 
-  // Signal & RSSI
+  
   rssiStrong: string;
   rssiMedium: string;
   rssiWeak: string;
@@ -171,19 +167,15 @@ export const NomadTypography = {
   },
 };
 
-/**
- * Backward compatibility export: default to Dark mode tokens,
- * keeping existing code working seamlessly while providing explicit light/dark themes.
- */
 export const NomadTheme = {
   colors: {
-    // Pure Solid Colors - NO GRADIENTS
+    
     background: DarkThemeColors.primaryBackground,
     surface: DarkThemeColors.surface,
     surfaceElevated: DarkThemeColors.surfaceElevated,
     surfaceBorder: DarkThemeColors.border,
 
-    // Brand Navy & Action Blue
+    
     brandNavy: DarkThemeColors.brandNavy,
     actionBlue: DarkThemeColors.actionBlue,
     accent: DarkThemeColors.actionBlue,
@@ -191,7 +183,7 @@ export const NomadTheme = {
     accentDark: '#1D4ED8',
     accentDim: DarkThemeColors.actionBlueSubtle,
 
-    // Tactical Status Colors
+    
     emergencyRed: DarkThemeColors.emergencyRed,
     emergencyRedDim: DarkThemeColors.emergencyRedSubtle,
     successGreen: DarkThemeColors.successGreen,
@@ -201,13 +193,13 @@ export const NomadTheme = {
     infoBlue: DarkThemeColors.actionBlue,
     infoBlueDim: DarkThemeColors.actionBlueSubtle,
 
-    // Typography
+    
     textPrimary: DarkThemeColors.primaryText,
     textSecondary: DarkThemeColors.secondaryText,
     textMuted: DarkThemeColors.mutedText,
     textInverse: DarkThemeColors.inverseText,
 
-    // Radio Link Quality
+    
     rssiStrong: DarkThemeColors.rssiStrong,
     rssiMedium: DarkThemeColors.rssiMedium,
     rssiWeak: DarkThemeColors.rssiWeak,

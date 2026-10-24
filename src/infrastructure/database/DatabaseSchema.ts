@@ -1,8 +1,4 @@
-/**
- * NOMAD LINK - Local Database Schema & Migration Engine
- * Encrypted local persistence model for conversations, messages, receipts,
- * peers, waypoints, convoy sessions, and DTN routing queues.
- */
+
 
 export interface DatabaseMigration {
   version: number;

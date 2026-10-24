@@ -1,7 +1,4 @@
-/**
- * NOMAD LINK - Core Domain Models
- * Strictly typed entities across Identity, Discovery, Messaging, Convoy, and Routing.
- */
+
 
 export enum TrustStatus {
   DISCOVERED = 'DISCOVERED',
@@ -72,7 +69,7 @@ export interface ConvoyMemberModel {
   headingDegrees: number;
   lastFixTimestamp: number;
   isDeadReckoning: boolean;
-  driftConfidence: number; // 0.0 to 1.0
+  driftConfidence: number; 
   status: 'MOVING' | 'STOPPED' | 'REGROUPING' | 'ASSISTANCE_REQUESTED' | 'OFFLINE';
 }
 
@@ -103,5 +100,5 @@ export interface DeadReckoningState {
   estimatedSpeedMps: number;
   headingDegrees: number;
   uncertaintyRadiusMeters: number;
-  driftConfidence: number; // 1.0 = perfect GPS, 0.0 = completely lost fix
+  driftConfidence: number; 
 }

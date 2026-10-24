@@ -66,7 +66,7 @@ class NomadBleModule(private val reactContext: ReactApplicationContext) :
                 .setIncludeDeviceName(false)
                 .setIncludeTxPowerLevel(false)
                 .addServiceUuid(ParcelUuid(NOMAD_SERVICE_UUID))
-                // Encapsulate short alias in service data payload
+                
                 .addServiceData(ParcelUuid(NOMAD_SERVICE_UUID), alias.take(8).toByteArray(Charsets.UTF_8))
                 .build()
 

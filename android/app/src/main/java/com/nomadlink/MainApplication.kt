@@ -25,7 +25,7 @@ class MainApplication : Application(), ReactApplication {
         object : DefaultReactNativeHost(this) {
             override fun getPackages(): List<ReactPackage> =
                 PackageList(this).packages.apply {
-                    // Add custom NOMAD LINK native modules
+                    
                     add(object : ReactPackage {
                         override fun createNativeModules(
                             reactContext: ReactApplicationContext
@@ -46,8 +46,8 @@ class MainApplication : Application(), ReactApplication {
 
             override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
-            // Old Architecture: disabled (set to false)
-            // To enable New Architecture, set to true and run RN codegen
+            
+            
             override val isNewArchEnabled: Boolean = false
             override val isHermesEnabled: Boolean = true
         }

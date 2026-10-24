@@ -36,7 +36,7 @@ type NavDestination =
   | 'Settings';
 
 export const AppContent: React.FC = () => {
-  const [isOnboarded, setIsOnboarded] = useState(true); // Default to dashboard for verified experience
+  const [isOnboarded, setIsOnboarded] = useState(true); 
   const [activeTab, setActiveTab] = useState<NavDestination>('Home');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -79,7 +79,7 @@ export const AppContent: React.FC = () => {
         backgroundColor={DarkThemeColors.primaryBackground}
       />
 
-      {/* Top Application Bar with Secondary Navigation Trigger */}
+      
       <View style={styles.appBar}>
         <View style={styles.appBarBrand}>
           <Text style={styles.brandIcon}>⚡</Text>
@@ -97,10 +97,10 @@ export const AppContent: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Main Content Area */}
+      
       <View style={styles.content}>{renderContent()}</View>
 
-      {/* Primary Bottom Navigation Bar (High Frequency Destinations) */}
+      
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tabItem, activeTab === 'Home' && styles.tabItemActive]}
@@ -161,7 +161,7 @@ export const AppContent: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Navigation Drawer Modal for Secondary Destinations */}
+      
       <Modal
         visible={isDrawerOpen}
         animationType="fade"

@@ -125,7 +125,7 @@ export const DangerButton: React.FC<Omit<BaseButtonProps, 'variant'>> = (props) 
 
 const styles = StyleSheet.create({
   buttonBase: {
-    minHeight: 48, // Touch target >= 48dp
+    minHeight: 48, 
     borderRadius: NomadRadius.md,
     justifyContent: 'center',
     alignItems: 'center',

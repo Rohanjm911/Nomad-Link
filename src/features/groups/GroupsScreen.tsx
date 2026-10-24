@@ -91,7 +91,7 @@ export const GroupsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Group Creation Dialog */}
+      
       {isCreatingGroup && (
         <View style={styles.createCard}>
           <Text style={styles.cardTitle}>CREATE OFFLINE ENCRYPTED GROUP</Text>
@@ -112,7 +112,7 @@ export const GroupsScreen: React.FC = () => {
         </View>
       )}
 
-      {/* Active Groups List */}
+      
       <SectionHeader title="Active Expedition Channels" />
       {groups.map(group => (
         <TouchableOpacity
@@ -150,7 +150,7 @@ export const GroupsScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Expanded Group Details */}
+          
           {selectedGroupId === group.groupId && (
             <View style={styles.expandedDetail}>
               <View style={styles.divider} />

@@ -47,7 +47,7 @@ export const SettingsScreen: React.FC = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.screenTitle}>SYSTEM CONFIGURATION & DIAGNOSTICS</Text>
 
-      {/* Section 1: Profile & Identity */}
+      
       <SectionHeader title="Profile & Hardware Cryptographic Identity" />
       <View style={styles.card}>
         <View style={styles.row}>
@@ -68,7 +68,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Section 2: Networking & Transport Controls */}
+      
       <SectionHeader title="Networking & Mesh Transport" />
       <View style={styles.card}>
         <View style={styles.row}>
@@ -114,7 +114,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Section 3: Battery & Resource Management */}
+      
       <SectionHeader title="Power & Resource Preservation" />
       <View style={styles.card}>
         <View style={styles.switchRow}>
@@ -148,7 +148,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Section 4: Diagnostics & Maintenance */}
+      
       <SectionHeader title="Diagnostics & Maintenance" />
       <View style={styles.card}>
         <View style={styles.row}>

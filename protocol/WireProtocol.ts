@@ -1,7 +1,4 @@
-/**
- * NOMAD LINK - Wire Protocol Definitions & Binary Serialization Encoders
- * Strictly implements the Protocol Buffer wire format and envelope framing.
- */
+
 
 export enum PayloadType {
   PAYLOAD_UNKNOWN = 0,
@@ -57,7 +54,7 @@ export interface MessageEnvelope {
   messageId: string;
   protocolVersion: number;
   originPeerId: string;
-  destinationId: string; // Peer ID, Group ID, or '*' for broadcast
+  destinationId: string; 
   createdAt: number;
   expiresAt: number;
   hopLimit: number;
@@ -129,13 +126,9 @@ export interface EmergencyBeaconPayload {
   isActive: boolean;
 }
 
-/**
- * Compact high-efficiency binary serializer for envelopes and payloads
- * Suitable for MTU-constrained BLE characteristics (e.g. 512 bytes with MTU exchange)
- */
 export class WireProtocolSerializer {
   private static readonly PROTOCOL_VERSION = 1;
-  private static readonly MAGIC_BYTE_HEADER = 0x4e; // 'N' for Nomad
+  private static readonly MAGIC_BYTE_HEADER = 0x4e; 
 
   public static serializeEnvelope(env: MessageEnvelope): Uint8Array {
     const jsonStr = JSON.stringify({
@@ -158,7 +151,7 @@ export class WireProtocolSerializer {
     const utf8Encoder = new TextEncoder();
     const payloadBytes = utf8Encoder.encode(jsonStr);
     
-    // Prefix magic header + length
+    
     const packet = new Uint8Array(payloadBytes.length + 3);
     packet[0] = this.MAGIC_BYTE_HEADER;
     packet[1] = (payloadBytes.length >> 8) & 0xff;

@@ -59,7 +59,7 @@ export const MessagingScreen: React.FC = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Top Header: Peer Selector & Peer Verification Info */}
+      
       <View style={styles.topHeader}>
         <View style={styles.peerSelectRow}>
           <TouchableOpacity
@@ -80,7 +80,7 @@ export const MessagingScreen: React.FC = () => {
           {selectedPeer && <TrustBadge status={selectedPeer.trustStatus} />}
         </View>
 
-        {/* Security & Route Notice */}
+        
         <View style={styles.e2eeBanner}>
           <Text style={styles.e2eeText}>
             🔒 End-to-End Encrypted (X25519 + ChaCha20). Relays cannot inspect payload.
@@ -88,7 +88,7 @@ export const MessagingScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Peer Picker Dropdown */}
+      
       {showPeerPicker && (
         <View style={styles.peerDropdownList}>
           <Text style={styles.dropdownTitle}>NEARBY DISCOVERED PEERS</Text>
@@ -114,7 +114,7 @@ export const MessagingScreen: React.FC = () => {
         </View>
       )}
 
-      {/* Message History Feed */}
+      
       {activeMessages.length === 0 ? (
         <View style={styles.emptyContainer}>
           <EmptyState
@@ -171,7 +171,7 @@ export const MessagingScreen: React.FC = () => {
         />
       )}
 
-      {/* Message Composer */}
+      
       <View style={styles.composerContainer}>
         <TextInput
           style={styles.inputField}

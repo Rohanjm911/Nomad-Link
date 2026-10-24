@@ -66,7 +66,7 @@ export const EmergencyScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Critical Advisory Notice Header */}
+      
       <View style={styles.alertHeader}>
         <Text style={styles.alertIcon}>🚨</Text>
         <View style={styles.alertTextWrap}>
@@ -77,7 +77,7 @@ export const EmergencyScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Dispatched Beacon State Banner */}
+      
       {sosDispatched && (
         <View style={styles.dispatchedCard}>
           <View style={styles.dispatchedRow}>
@@ -96,7 +96,7 @@ export const EmergencyScreen: React.FC = () => {
         </View>
       )}
 
-      {/* Geolocation & Fix Quality Summary */}
+      
       <SectionHeader title="Attached Position Telemetry" />
       <View style={styles.geoCard}>
         <View style={styles.geoRow}>
@@ -114,7 +114,7 @@ export const EmergencyScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Emergency Category Selector */}
+      
       <SectionHeader title="Select Emergency Category" />
       <View style={styles.severityGrid}>
         <TouchableOpacity
@@ -178,7 +178,7 @@ export const EmergencyScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Distress Note Input */}
+      
       <SectionHeader title="Distress Message Payload" />
       <TextInput
         style={styles.textInput}
@@ -190,7 +190,7 @@ export const EmergencyScreen: React.FC = () => {
         placeholderTextColor={DarkThemeColors.mutedText}
       />
 
-      {/* Confirmation & Dispatch Action */}
+      
       <View style={styles.actionWrap}>
         <DangerButton
           label={isTransmitting ? 'Transmitting...' : 'ACTIVATE DISTRESS BEACON'}

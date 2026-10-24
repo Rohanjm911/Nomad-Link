@@ -45,7 +45,7 @@ export const MeshScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Header: Radio Controls & Discovery State */}
+      
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>OFFLINE MESH RADAR</Text>
@@ -67,7 +67,7 @@ export const MeshScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Mode Switcher: Device List vs Mesh Topology Overview */}
+      
       <View style={styles.tabSwitcher}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === 'list' && styles.tabButtonActive]}
@@ -88,7 +88,7 @@ export const MeshScreen: React.FC = () => {
       </View>
 
       {activeTab === 'list' ? (
-        /* Device List Presentation */
+        
         <FlatList
           data={peers}
           keyExtractor={item => item.peerId}
@@ -119,7 +119,7 @@ export const MeshScreen: React.FC = () => {
 
                 <View style={styles.divider} />
 
-                {/* Fingerprint & Security Status */}
+                
                 <View style={styles.securityRow}>
                   <View style={styles.fingerprintCol}>
                     <Text style={styles.safetyLabel}>SAFETY NUMBER FINGERPRINT</Text>
@@ -128,7 +128,7 @@ export const MeshScreen: React.FC = () => {
                   <TrustBadge status={item.trustStatus} />
                 </View>
 
-                {/* Action Controls */}
+                
                 <View style={styles.actionRow}>
                   <TouchableOpacity
                     style={styles.verifyBtn}
@@ -160,7 +160,7 @@ export const MeshScreen: React.FC = () => {
           }}
         />
       ) : (
-        /* Mesh Topology Diagram View */
+        
         <View style={styles.topologyContainer}>
           <Text style={styles.topologyTitle}>ESTABLISHED PEER-TO-PEER MESH TOPOLOGY</Text>
           <Text style={styles.topologySubtitle}>
@@ -168,7 +168,7 @@ export const MeshScreen: React.FC = () => {
           </Text>
 
           <View style={styles.topologyCanvas}>
-            {/* Center Local Device Node */}
+            
             <View style={styles.localNode}>
               <Text style={styles.nodeIcon}>⚡</Text>
               <Text style={styles.nodeAlias}>You (Alpha)</Text>
@@ -177,7 +177,7 @@ export const MeshScreen: React.FC = () => {
 
             <View style={styles.topologyLine} />
 
-            {/* Discovered Peer Nodes */}
+            
             <View style={styles.nodesGrid}>
               {peers.map((peer, idx) => (
                 <View key={peer.peerId} style={styles.peerNode}>
@@ -217,7 +217,7 @@ export const MeshScreen: React.FC = () => {
         </View>
       )}
 
-      {/* Screen 05 — Peer Verification Modal */}
+      
       {selectedPeerForVerify && (
         <Modal
           visible={!!selectedPeerForVerify}

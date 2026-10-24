@@ -45,19 +45,19 @@ interface NomadContextType {
 const NomadContext = createContext<NomadContextType | null>(null);
 
 export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // 1. Initialize Device Cryptographic Identity
+  
   const [identity] = useState<NomadDeviceIdentity>(() => {
     return CryptoEngine.generateIdentity('Ranger-Alpha');
   });
 
-  // 2. Core Engines
+  
   const [meshRouter] = useState<BoundedMeshRouter>(() => {
     return new BoundedMeshRouter(identity.peerId, 250, 7);
   });
 
   const [sensorEngine] = useState<DeadReckoningEngine>(() => {
     const engine = new DeadReckoningEngine();
-    // Seed initial position (e.g. Remote Mountain Pass: 34.2257° N, 77.5619° E, Leh-Ladakh Expedition)
+    
     engine.onGpsFix({
       timestamp: Date.now(),
       latitude: 34.2257,
@@ -70,7 +70,7 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return engine;
   });
 
-  // 3. Reactive State
+  
   const [peers, setPeers] = useState<PeerRecord[]>([
     {
       peerId: 'e89fbc018274a10293847561928374a5b6c7d8e9f0123456789abcdef0123456',
@@ -211,7 +211,7 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isBackgroundServiceActive, setIsBackgroundServiceActive] = useState(true);
   const [batteryEcoMode, setBatteryEcoMode] = useState(false);
 
-  // Inertial sensor simulation interval to update dead reckoning drift confidence
+  
   useEffect(() => {
     const interval = setInterval(() => {
       const reading = {
@@ -270,7 +270,7 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setMessages(prev => [...prev, newMsg]);
 
-    // End-to-End Encrypt using peer's public key
+    
     const rawPlaintext = WireProtocolSerializer.encodeDirectMessage({
       messageId: msgId,
       conversationId: targetPeerId,
@@ -286,7 +286,7 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const encryptedPackage = CryptoEngine.encryptForPeer(rawPlaintext, recipientPubKey);
 
-    // Build Delay-Tolerant Network Envelope
+    
     const envelope = {
       messageId: msgId,
       protocolVersion: 1,
@@ -303,10 +303,10 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       nonce: encryptedPackage.nonce,
     };
 
-    // Store in DTN Router queue
+    
     meshRouter.enqueueForForwarding(envelope);
 
-    // Simulate opportunistic peer delivery
+    
     setTimeout(() => {
       setMessages(prev =>
         prev.map(m =>
@@ -338,9 +338,9 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       messageId: beaconId,
       protocolVersion: 1,
       originPeerId: identity.peerId,
-      destinationId: '*', // Broadcast to entire mesh
+      destinationId: '*', 
       createdAt: Date.now(),
-      expiresAt: Date.now() + 172800000, // 48-hour priority persistence
+      expiresAt: Date.now() + 172800000, 
       hopLimit: 12,
       hopCount: 0,
       payloadType: PayloadType.PAYLOAD_EMERGENCY_BEACON,
@@ -350,7 +350,7 @@ export const NomadProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     meshRouter.enqueueForForwarding(envelope);
 
-    // Add visual emergency message to local audit log
+    
     setMessages(prev => [
       ...prev,
       {

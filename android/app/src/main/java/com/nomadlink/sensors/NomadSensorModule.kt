@@ -83,7 +83,7 @@ class NomadSensorModule(private val reactContext: ReactApplicationContext) :
             }
         }
 
-        // Calculate device azimuth (compass orientation in degrees)
+        
         val rotationMatrix = FloatArray(9)
         val orientationAngles = FloatArray(3)
         var azimuthDeg = 0f

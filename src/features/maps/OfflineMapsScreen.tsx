@@ -82,7 +82,7 @@ export const OfflineMapsScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Top Header & Tab Switcher */}
+      
       <View style={styles.header}>
         <View>
           <Text style={styles.screenHeading}>OFFLINE NAVIGATION & MAPS</Text>
@@ -113,7 +113,7 @@ export const OfflineMapsScreen: React.FC = () => {
 
       {selectedTab === 'map' ? (
         <>
-          {/* Tactical Map Display */}
+          
           <View style={styles.mapDisplayCard}>
             <View style={styles.mapHeaderRow}>
               <Text style={styles.mapBadge}>CACHED REGION: LADAKH (OFFLINE)</Text>
@@ -131,26 +131,26 @@ export const OfflineMapsScreen: React.FC = () => {
               </Text>
             </View>
 
-            {/* Simulated Vector Map Area */}
+            
             <View style={styles.vectorCanvas}>
-              {/* Contour & Trail Simulation Lines */}
+              
               <View style={styles.contourLine1} />
               <View style={styles.contourLine2} />
               <View style={styles.trailPath} />
 
-              {/* Current Position Marker */}
+              
               <View style={styles.posMarker}>
                 <View style={styles.posHeadingCone} />
                 <View style={styles.posCenterDot} />
               </View>
 
-              {/* Scale Indicator */}
+              
               <View style={styles.scaleBar}>
                 <View style={styles.scaleLine} />
                 <Text style={styles.scaleText}>500 m</Text>
               </View>
 
-              {/* Compass Indicator */}
+              
               <View style={styles.compassBox}>
                 <Text style={styles.compassNorth}>N</Text>
                 <Text style={styles.compassDeg}>{deadReckoning.headingDegrees.toFixed(0)}°</Text>
@@ -176,7 +176,7 @@ export const OfflineMapsScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Waypoint Marking Dialog */}
+          
           {isMarkingWaypoint && (
             <View style={styles.waypointPromptCard}>
               <Text style={styles.promptTitle}>SAVE CURRENT SENSOR COORDINATES</Text>
@@ -208,7 +208,7 @@ export const OfflineMapsScreen: React.FC = () => {
             </View>
           )}
 
-          {/* Navigation Limitation Notice */}
+          
           <View style={styles.noticeCard}>
             <Text style={styles.noticeTitle}>OFFLINE ROUTING ADVISORY</Text>
             <Text style={styles.noticeBody}>
@@ -217,7 +217,7 @@ export const OfflineMapsScreen: React.FC = () => {
           </View>
         </>
       ) : (
-        /* Offline Region Manager */
+        
         <View style={styles.managerContainer}>
           <SectionHeader title="Downloaded Offline Map Packs" />
           {regions.map(r => {

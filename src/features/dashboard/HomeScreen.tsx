@@ -35,7 +35,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Top Section: Branding, Device Alias & Settings */}
+      
       <View style={styles.topHeader}>
         <View>
           <Text style={styles.brandTitle}>NOMAD LINK</Text>
@@ -54,7 +54,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Network Status Card */}
+      
       <View style={styles.statusCard}>
         <View style={styles.statusRow}>
           <View style={styles.statusTitleRow}>
@@ -114,7 +114,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </View>
       </View>
 
-      {/* Nearby Peers Section */}
+      
       <SectionHeader
         title="Nearby Mesh Devices"
         actionText="Mesh Radar →"
@@ -140,7 +140,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </View>
       ))}
 
-      {/* Convoy Summary Card */}
+      
       <SectionHeader
         title="Convoy Operations"
         actionText="View Convoy →"
@@ -163,7 +163,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </Text>
       </TouchableOpacity>
 
-      {/* Navigation & Dead Reckoning Summary */}
+      
       <SectionHeader
         title="Offline Navigation & Fix Quality"
         actionText="Open Map →"
@@ -199,7 +199,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate }) => {
         </Text>
       </TouchableOpacity>
 
-      {/* Emergency Distress Entry Point */}
+      
       <SectionHeader title="Emergency Readiness" />
       <TouchableOpacity
         style={styles.emergencyCard}

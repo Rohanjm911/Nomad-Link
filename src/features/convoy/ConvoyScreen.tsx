@@ -58,7 +58,7 @@ export const ConvoyScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Convoy Header */}
+      
       <View style={styles.header}>
         <View style={styles.headerTitleWrap}>
           <Text style={styles.convoyName}>{convoy.convoyName}</Text>
@@ -72,7 +72,7 @@ export const ConvoyScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Convoy Tactical Map Visualizer */}
+      
       <View style={styles.mapCard}>
         <View style={styles.mapHeaderRow}>
           <Text style={styles.mapTitle}>TACTICAL CONVOY POSITION MAP</Text>
@@ -80,11 +80,11 @@ export const ConvoyScreen: React.FC = () => {
         </View>
 
         <View style={styles.mapCanvas}>
-          {/* Simulated Tactical Map Canvas */}
+          
           <View style={styles.gridLineHorizontal} />
           <View style={styles.gridLineVertical} />
 
-          {/* Member Map Pins */}
+          
           {convoy.members.map((member, idx) => {
             const isMe = member.peerId.includes('Alpha') || idx === 1;
             const topOffset = 25 + idx * 35;
@@ -135,7 +135,7 @@ export const ConvoyScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Member Cards */}
+      
       <SectionHeader title="Convoy Telemetry & Formation" />
       {convoy.members.map(item => {
         const statusColor = getStatusColor(item.status);
@@ -206,7 +206,7 @@ export const ConvoyScreen: React.FC = () => {
         );
       })}
 
-      {/* Convoy Waypoints Section */}
+      
       <SectionHeader title="Expedition Waypoints" />
       <View style={styles.waypointContainer}>
         {convoy.activeWaypoints.map((wp: SavedWaypointModel) => (
